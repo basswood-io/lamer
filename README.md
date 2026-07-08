@@ -88,6 +88,11 @@ checked-in reference `testcase.mp3`.
 - `include/` - public headers
 - `doc/` - command line man page
 
+## License
+
+LAMER is licensed under `LGPL-2.1-or-later`. See `LICENSE` for the full license
+text.
+
 ## Changes from the Original Source
 
 This tree keeps the LAME encoder code while removing dead source paths and
