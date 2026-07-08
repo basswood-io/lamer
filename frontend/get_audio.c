@@ -107,12 +107,20 @@ static unsigned int uint32_high_low(unsigned char *bytes)
     return (hh << 24) | (hl << 16) | (lh << 8) | ll;
 }
 
+static void
+read_bytes_or_zero(FILE *fp, unsigned char *bytes, size_t size)
+{
+    size_t const bytes_read = fread(bytes, 1, size, fp);
+    if (bytes_read < size) {
+        memset(bytes + bytes_read, 0, size - bytes_read);
+    }
+}
+
 static double
 read_ieee_extended_high_low(FILE * fp)
 {
     unsigned char bytes[10];
-    memset(bytes, 0, 10);
-    fread(bytes, 1, 10, fp);
+    read_bytes_or_zero(fp, bytes, sizeof(bytes));
     {
         int32_t const s = (bytes[0] & 0x80);
         int32_t const e_h = (bytes[0] & 0x7F);
@@ -143,8 +151,8 @@ read_ieee_extended_high_low(FILE * fp)
 static int
 read_16_bits_low_high(FILE * fp)
 {
-    unsigned char bytes[2] = { 0, 0 };
-    fread(bytes, 1, 2, fp);
+    unsigned char bytes[2];
+    read_bytes_or_zero(fp, bytes, sizeof(bytes));
     {
         int32_t const low = bytes[0];
         int32_t const high = (signed char) (bytes[1]);
@@ -156,8 +164,8 @@ read_16_bits_low_high(FILE * fp)
 static int
 read_32_bits_low_high(FILE * fp)
 {
-    unsigned char bytes[4] = { 0, 0, 0, 0 };
-    fread(bytes, 1, 4, fp);
+    unsigned char bytes[4];
+    read_bytes_or_zero(fp, bytes, sizeof(bytes));
     {
         int32_t const low = bytes[0];
         int32_t const medl = bytes[1];
@@ -170,8 +178,8 @@ read_32_bits_low_high(FILE * fp)
 static int
 read_16_bits_high_low(FILE * fp)
 {
-    unsigned char bytes[2] = { 0, 0 };
-    fread(bytes, 1, 2, fp);
+    unsigned char bytes[2];
+    read_bytes_or_zero(fp, bytes, sizeof(bytes));
     {
         int32_t const low = bytes[1];
         int32_t const high = (signed char) (bytes[0]);
@@ -182,8 +190,8 @@ read_16_bits_high_low(FILE * fp)
 static int
 read_32_bits_high_low(FILE * fp)
 {
-    unsigned char bytes[4] = { 0, 0, 0, 0 };
-    fread(bytes, 1, 4, fp);
+    unsigned char bytes[4];
+    read_bytes_or_zero(fp, bytes, sizeof(bytes));
     {
         int32_t const low = bytes[3];
         int32_t const medl = bytes[2];

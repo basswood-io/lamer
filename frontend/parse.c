@@ -2594,6 +2594,9 @@ static int
 merge_argv(int argc, char** argv, int str_argc, char** str_argv, int N)
 {
     int     i;
+    if (argc <= 0) {
+        return str_argc;
+    }
     if (argc > 0) {
         str_argv[0] = argv[0];
         if (str_argc < 1) str_argc = 1;
@@ -2621,11 +2624,16 @@ dump_argv(int argc, char** argv)
 
 int parse_args(lame_t gfp, int argc, char **argv, char *const inPath, char *const outPath, char **nogap_inPath, int *num_nogap)
 {
-    char   *str_argv[512], *str;
+    char    default_program[] = "lame";
+    char   *str_argv[512] = { 0 }, *str;
     int     str_argc, ret;
     str = lame_getenv("LAMEOPT");
     str_argc = string_to_argv(str, str_argv, dimension_of(str_argv));
     str_argc = merge_argv(argc, argv, str_argc, str_argv, dimension_of(str_argv));
+    if (str_argc < 1) {
+        str_argv[0] = default_program;
+        str_argc = 1;
+    }
 #ifdef DEBUG
     dump_argv(str_argc, str_argv);
 #endif
