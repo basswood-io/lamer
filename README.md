@@ -58,7 +58,6 @@ checked-in reference `testcase.mp3`.
 - `mpglib/` - MP3 decoder support used by the library
 - `include/` - public headers
 - `doc/` - bundled documentation and man page
-- `Dll/`, `ACM/` - legacy Windows-related sources
 
 ## License
 

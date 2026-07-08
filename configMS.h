@@ -87,18 +87,6 @@ typedef float       ieee754_float32_t;
 # define DECODE_ON_THE_FLY 1
 #endif
 
-#ifdef LAME_ACM
-/* memory hacking for driver purposes */
-#define calloc(x,y) acm_Calloc(x,y)
-#define free(x)     acm_Free(x)
-#define malloc(x)   acm_Malloc(x)
-
-#include <stddef.h>
-void *acm_Calloc( size_t num, size_t size );
-void *acm_Malloc( size_t size );
-void acm_Free( void * mem);
-#endif /* LAME_ACM */
-
 #define LAME_LIBRARY_BUILD
 
 
