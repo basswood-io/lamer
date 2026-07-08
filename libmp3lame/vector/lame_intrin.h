@@ -58,6 +58,9 @@ fht_SSE2(FLOAT* , int);
 #if LAME_HAVE_AARCH64_NEON_INTRINSICS
 void
 init_xrpow_core_neon(gr_info * const cod_info, FLOAT xrpow[576], int upper, FLOAT * sum);
+
+void
+fht_neon(FLOAT* , int);
 #endif
 
 #if LAME_HAVE_WASM_SIMD_INTRINSICS
