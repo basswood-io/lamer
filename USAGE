@@ -71,23 +71,6 @@ Streaming Example
 % cat inputfile | lame [options] - - > output
 
 
-=======================================================================
-Scripts are included (in the 'misc' subdirectory)
-to run lame on multiple files:
-
-bash script:  mlame      Run "mlame -?" for instructions.
-sh script:    auenc      Run auenc for instructions
-sh script:    mugeco.sh
-
-Perl script which will re-encode mp3 files and preserve id3 tags:
-lameid3.pl
-
-Windows scripts:
-lame4dos.bat
-Lame.vbs   (and an HTML frontend: LameGUI.html)
-
-
-=======================================================================
 options guide:
 =======================================================================
 These options are explained in detail below.
@@ -965,4 +948,3 @@ this one).
 The consequence is an increase of bitrate (+60kbps in some cases) compared to
 not keeping that precision. Generally, this band should allow for distortions,
 so using this switch shouldn't cause harm.
-
