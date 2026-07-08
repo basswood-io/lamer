@@ -130,7 +130,7 @@ init_files(lame_global_flags * gf, char const *inPath, char const *outPath)
 static void
 printInputFormat(lame_t gfp)
 {
-    int const v_main = 2 - lame_get_version(gfp);
+    int const v_main = 2 - lame_get_mpeg_version(gfp);
     char const *v_ex = lame_get_out_samplerate(gfp) < 16000 ? ".5" : "";
     switch (global_reader.input_format) {
     case sf_mp123:     /* FIXME: !!! */

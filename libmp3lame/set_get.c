@@ -1966,7 +1966,7 @@ lame_get_emphasis(const lame_global_flags * gfp)
  * (2 = MPEG-2.5)    
  */
 int
-lame_get_version(const lame_global_flags * gfp)
+lame_get_mpeg_version(const lame_global_flags * gfp)
 {
     if (is_lame_global_flags_valid(gfp)) {
         lame_internal_flags const *const gfc = gfp->internal_flags;
@@ -1975,6 +1975,12 @@ lame_get_version(const lame_global_flags * gfp)
         }
     }
     return 0;
+}
+
+int
+lame_get_version(const lame_global_flags * gfp)
+{
+    return lame_get_mpeg_version(gfp);
 }
 
 

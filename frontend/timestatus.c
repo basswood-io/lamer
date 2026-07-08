@@ -243,7 +243,7 @@ encoder_progress_begin( lame_global_flags const* gf
             case vbr_rh:
                 console_printf("%s MPEG-%u%s Layer III VBR(q=%g) qval=%i\n",
                                mode_names[lame_get_force_ms(gf)][lame_get_mode(gf)],
-                               2 - lame_get_version(gf),
+                               2 - lame_get_mpeg_version(gf),
                                lame_get_out_samplerate(gf) < 16000 ? ".5" : "",
                                lame_get_VBR_quality(gf),
                                lame_get_quality(gf));
@@ -252,14 +252,14 @@ encoder_progress_begin( lame_global_flags const* gf
             case vbr_mtrh:
                 console_printf("%s MPEG-%u%s Layer III VBR(q=%g)\n",
                                mode_names[lame_get_force_ms(gf)][lame_get_mode(gf)],
-                               2 - lame_get_version(gf),
+                               2 - lame_get_mpeg_version(gf),
                                lame_get_out_samplerate(gf) < 16000 ? ".5" : "",
                                lame_get_VBR_quality(gf));
                 break;
             case vbr_abr:
                 console_printf("%s MPEG-%u%s Layer III (%gx) average %d kbps qval=%i\n",
                                mode_names[lame_get_force_ms(gf)][lame_get_mode(gf)],
-                               2 - lame_get_version(gf),
+                               2 - lame_get_mpeg_version(gf),
                                lame_get_out_samplerate(gf) < 16000 ? ".5" : "",
                                0.1 * (int) (10. * lame_get_compression_ratio(gf) + 0.5),
                                lame_get_VBR_mean_bitrate_kbps(gf),
@@ -268,7 +268,7 @@ encoder_progress_begin( lame_global_flags const* gf
             default:
                 console_printf("%s MPEG-%u%s Layer III (%gx) %3d kbps qval=%i\n",
                                mode_names[lame_get_force_ms(gf)][lame_get_mode(gf)],
-                               2 - lame_get_version(gf),
+                               2 - lame_get_mpeg_version(gf),
                                lame_get_out_samplerate(gf) < 16000 ? ".5" : "",
                                0.1 * (int) (10. * lame_get_compression_ratio(gf) + 0.5),
                                lame_get_brate(gf),

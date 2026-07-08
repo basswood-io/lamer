@@ -136,6 +136,7 @@ lame_set_force_short_blocks
 lame_get_force_short_blocks
 lame_set_emphasis
 lame_get_emphasis
+lame_get_mpeg_version
 lame_get_version
 lame_get_encoder_delay
 lame_get_encoder_padding

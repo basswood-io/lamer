@@ -564,7 +564,10 @@ int CDECL lame_get_emphasis(const lame_global_flags *);
 /* internal variables, cannot be set...                                 */
 /* provided because they may be of use to calling application           */
 /************************************************************************/
-/* version  0=MPEG-2  1=MPEG-1  (2=MPEG-2.5)     */
+/* MPEG version: 0=MPEG-2, 1=MPEG-1, 2=MPEG-2.5 */
+int CDECL lame_get_mpeg_version(const lame_global_flags *);
+
+/* Compatibility alias for lame_get_mpeg_version(). */
 int CDECL lame_get_version(const lame_global_flags *);
 
 /* encoder delay   */
