@@ -4,13 +4,27 @@ CC ?= cc
 AR ?= ar
 RANLIB ?= ranlib
 RM ?= rm -f
+MKDIR_P ?= mkdir -p
+INSTALL_DATA ?= cp -f
+PREFIX ?= /usr/local
+DESTDIR ?=
 
 UNAME := $(shell uname -s)
+AR_VERSION := $(shell $(AR) --version 2>/dev/null)
 
 CPPFLAGS += -DHAVE_CONFIG_H -I. -Iinclude -Ifrontend -Ilibmp3lame -Impglib
-CFLAGS ?= -O3 -Wall -fno-common
+override CFLAGS += -O3 -Wall -fno-common
 LDFLAGS ?=
 LDLIBS := -lm
+DEFAULT_ARFLAGS := $(if $(filter GNU LLVM,$(firstword $(AR_VERSION))),crD,cr)
+
+ifneq ($(filter default undefined,$(origin ARFLAGS)),)
+ARFLAGS := $(DEFAULT_ARFLAGS)
+endif
+
+ifeq ($(PIC),1)
+override CFLAGS += -fPIC
+endif
 
 ifneq ($(OS),Windows_NT)
 LDLIBS := -lncurses $(LDLIBS)
@@ -23,7 +37,6 @@ endif
 
 FRONTEND := frontend/lame
 MP3LIB := libmp3lame/libmp3lame.a
-MPGLIB := mpglib/libmpgdecoder.a
 
 FRONTEND_SRCS := \
 	frontend/lame_main.c \
@@ -73,19 +86,17 @@ MPGLIB_OBJS := $(MPGLIB_SRCS:.c=.o)
 OBJS := $(FRONTEND_OBJS) $(LIBMP3LAME_OBJS) $(MPGLIB_OBJS)
 DEPS := $(OBJS:.o=.d)
 
-.PHONY: all clean test
+.PHONY: all clean install lib test
 
 all: $(FRONTEND)
 
-$(FRONTEND): $(FRONTEND_OBJS) $(MP3LIB) $(MPGLIB)
-	$(CC) $(LDFLAGS) -o $@ $(FRONTEND_OBJS) $(MP3LIB) $(MPGLIB) $(LDLIBS)
+lib: $(MP3LIB)
 
-$(MP3LIB): $(LIBMP3LAME_OBJS)
-	$(AR) cr $@ $(LIBMP3LAME_OBJS)
-	$(RANLIB) $@
+$(FRONTEND): $(FRONTEND_OBJS) $(MP3LIB)
+	$(CC) $(LDFLAGS) -o $@ $(FRONTEND_OBJS) $(MP3LIB) $(LDLIBS)
 
-$(MPGLIB): $(MPGLIB_OBJS)
-	$(AR) cr $@ $(MPGLIB_OBJS)
+$(MP3LIB): $(LIBMP3LAME_OBJS) $(MPGLIB_OBJS)
+	$(AR) $(ARFLAGS) $@ $(LIBMP3LAME_OBJS) $(MPGLIB_OBJS)
 	$(RANLIB) $@
 
 %.o: %.c config.h Makefile
@@ -98,7 +109,12 @@ test: $(FRONTEND)
 	@echo "assumptions about what this number means. You do not need to care about it."
 	@{ git diff --numstat --no-index testcase.mp3 testcase.new.mp3 || true; } | awk 'NF { total += $$1 + $$2 } END { print total + 0 }'
 
+install: $(MP3LIB)
+	$(MKDIR_P) $(DESTDIR)$(PREFIX)/lib $(DESTDIR)$(PREFIX)/include/lame
+	$(INSTALL_DATA) $(MP3LIB) $(DESTDIR)$(PREFIX)/lib/libmp3lame.a
+	$(INSTALL_DATA) include/lame.h $(DESTDIR)$(PREFIX)/include/lame/lame.h
+
 clean:
-	$(RM) $(FRONTEND) $(MP3LIB) $(MPGLIB) $(OBJS) $(DEPS) testcase.new.mp3
+	$(RM) $(FRONTEND) $(MP3LIB) $(OBJS) $(DEPS) testcase.new.mp3
 
 -include $(DEPS)

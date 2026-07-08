@@ -12,10 +12,29 @@ Build the command line encoder:
 make
 ```
 
+Build only the static library:
+
+```sh
+make lib
+```
+
+`libmp3lame/libmp3lame.a` is self-contained and includes the MP3 decoder
+support objects from `mpglib/`.
+
+Install the static library and public header:
+
+```sh
+make install PREFIX=/usr/local
+```
+
+This installs `lib/libmp3lame.a` and `include/lame/lame.h`. Use `DESTDIR` for
+staged packaging installs.
+
 Override the compiler or flags when needed:
 
 ```sh
 make CC=clang CFLAGS="-O2 -Wall"
+make lib PIC=1
 ```
 
 ## Test

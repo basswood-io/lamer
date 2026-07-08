@@ -5,6 +5,26 @@ Build the command line encoder with the maintained top-level Makefile:
 
     make
 
+Build only the static library:
+
+    make lib
+
+The static library is self-contained: libmp3lame/libmp3lame.a includes the
+MP3 decoder support objects from mpglib.
+
+Install the static library and public header:
+
+    make install PREFIX=/usr/local
+
+This installs:
+
+    $(PREFIX)/lib/libmp3lame.a
+    $(PREFIX)/include/lame/lame.h
+
+Use DESTDIR for staged packaging installs:
+
+    make install DESTDIR=/tmp/package PREFIX=/usr
+
 Run the encoder smoke test:
 
     make test
@@ -21,9 +41,9 @@ Useful overrides:
     make CC=clang
     make CFLAGS="-O2 -Wall"
     make LDFLAGS="..."
+    make lib PIC=1
 
 The default target builds:
 
     frontend/lame
     libmp3lame/libmp3lame.a
-    mpglib/libmpgdecoder.a
