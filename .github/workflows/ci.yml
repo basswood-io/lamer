@@ -15,12 +15,8 @@ jobs:
         include:
           - name: Ubuntu
             os: ubuntu-latest
-            shell: bash
-            make_flags: ""
           - name: Windows ARM64
             os: windows-11-arm
-            shell: msys2 {0}
-            make_flags: CC=clang AR=llvm-ar RANLIB=llvm-ranlib
 
     steps:
       - name: Check out repository
@@ -43,10 +39,20 @@ jobs:
             mingw-w64-clang-aarch64-clang
             mingw-w64-clang-aarch64-ncurses
 
-      - name: Build
-        shell: ${{ matrix.shell }}
-        run: make ${{ matrix.make_flags }}
+      - name: Build on Ubuntu
+        if: runner.os == 'Linux'
+        run: make
 
-      - name: Test
-        shell: ${{ matrix.shell }}
-        run: make test ${{ matrix.make_flags }}
+      - name: Test on Ubuntu
+        if: runner.os == 'Linux'
+        run: make test
+
+      - name: Build on Windows ARM64
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
+        run: make CC=clang AR=llvm-ar RANLIB=llvm-ranlib
+
+      - name: Test on Windows ARM64
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
+        run: make test CC=clang AR=llvm-ar RANLIB=llvm-ranlib
