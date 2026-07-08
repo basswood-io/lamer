@@ -18,8 +18,7 @@ file to the lame/test directory, and run:
 LAME API
 ========
 
-For a general outline of the code, see the file API.  
-Also, frontend/main.c is a simple front end to libmp3lame.a
+frontend/main.c is a simple front end to libmp3lame.a
 
 The guts of the code are called from lame_encode_buffer().
 
@@ -118,4 +117,3 @@ flags all the way back up the call stack.
    }
 
 3. The data should be free'd in the routine freegfc().
-

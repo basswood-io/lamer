@@ -153,7 +153,7 @@ typedef lame_global_flags *lame_t;
  *
  *  The LAME API
  *  These functions should be called, in this order, for each
- *  MP3 file to be encoded.  See the file "API" for more documentation
+ *  MP3 file to be encoded.
  *
  ***********************************************************************/
 
@@ -1339,4 +1339,3 @@ typedef enum {
 }
 #endif
 #endif /* LAME_LAME_H */
-

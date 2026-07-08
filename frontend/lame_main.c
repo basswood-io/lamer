@@ -568,7 +568,7 @@ lame_main(lame_t gf, int argc, char **argv)
      * struct 'gf'.  If you want to parse your own arguments,
      * or call libmp3lame from a program which uses a GUI to set arguments,
      * skip this call and set the values of interest in the gf struct.
-     * (see the file API and lame.h for documentation about these parameters)
+     * (see lame.h for documentation about these parameters)
      */
     ret = parse_args(gf, argc, argv, inPath, outPath, nogap_inPath, &max_nogap);
     if (ret < 0) {
