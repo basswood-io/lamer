@@ -6,19 +6,47 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Ubuntu
+            os: ubuntu-latest
+            shell: bash
+            make_flags: ""
+          - name: Windows ARM64
+            os: windows-11-arm
+            shell: msys2 {0}
+            make_flags: CC=clang AR=llvm-ar RANLIB=llvm-ranlib
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Install build dependencies
+      - name: Install Ubuntu build dependencies
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential libncurses-dev
 
+      - name: Set up MSYS2
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: CLANGARM64
+          update: true
+          install: >-
+            make
+            mingw-w64-clang-aarch64-clang
+            mingw-w64-clang-aarch64-ncurses
+
       - name: Build
-        run: make
+        shell: ${{ matrix.shell }}
+        run: make ${{ matrix.make_flags }}
 
       - name: Test
-        run: make test
+        shell: ${{ matrix.shell }}
+        run: make test ${{ matrix.make_flags }}
