@@ -5,7 +5,6 @@ LAMER is a cleaned-up source tree for the LAME MP3 encoder. It builds the
 Makefile.
 
 ## Build
-
 Build the command line encoder:
 
 ```sh
@@ -21,7 +20,8 @@ make lib
 By default, `libmp3lame/libmp3lame.a` is self-contained and includes the MP3
 decoder support objects from `mpglib/`.
 
-Build an encoder-only library, matching LAME's old `--disable-decoder` option:
+Build an encoder-only library, matching LAME's old `--disable-decoder` option.
+This is useful for consumers that already rely on ffmpeg or another decoder:
 
 ```sh
 make lib DECODER=0
@@ -48,6 +48,26 @@ Override the compiler or flags when needed:
 make CC=clang CFLAGS="-O2 -Wall"
 make lib PIC=1
 ```
+
+Useful build variables:
+
+- `CC`, `AR`, `RANLIB` - toolchain programs
+- `CFLAGS`, `CPPFLAGS`, `LDFLAGS` - extra compile and link flags
+- `PIC=1` - add `-fPIC` for static libraries later linked into shared objects
+- `DECODER=0` - omit `mpglib` decoder support
+- `PREFIX`, `DESTDIR` - install location and packaging root
+
+## WebAssembly
+
+Build a WebAssembly SIMD static library with Emscripten:
+
+```sh
+make lib DECODER=0 CC=emcc AR=emar RANLIB=emranlib CFLAGS="-msimd128"
+```
+
+When `-msimd128` enables `__wasm_simd128__`, `libmp3lame` uses WebAssembly SIMD
+intrinsics for the `init_xrpow_core` quantization helper. Native builds use SSE
+intrinsics when the compiler target supports them, and otherwise fall back to C.
 
 ## Test
 
@@ -88,4 +108,5 @@ tightening code that modern compilers warn about.
   edge of the representable range.
 - Removed stale constants and unused declarations from inactive IEEE754 and
   AIFF/MPEG paths so strict clang builds no longer depend on dead code.
-
+- Added maintained intrinsic dispatch for native SSE and WebAssembly SIMD while
+  keeping scalar C fallbacks for other targets.
