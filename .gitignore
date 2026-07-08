@@ -1,2 +1,8 @@
 testcase*
 config.log
+*.a
+*.d
+*.la
+*.lo
+*.o
+frontend/lame

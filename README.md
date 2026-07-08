@@ -1,28 +1,21 @@
 # LAMER
 
 LAMER is a cleaned-up source tree for the LAME MP3 encoder. It builds the
-`lame` command line encoder and `libmp3lame` library from the bundled autotools
-build files.
+`lame` command line encoder and `libmp3lame` library with a direct maintained
+Makefile.
 
 ## Build
 
-The configured tree can be built directly:
+Build the command line encoder:
 
 ```sh
 make
 ```
 
-To configure from scratch, use:
+Override the compiler or flags when needed:
 
 ```sh
-./configure
-make
-```
-
-The simplified Unix makefile is also available:
-
-```sh
-make -f Makefile.unix
+make CC=clang CFLAGS="-O2 -Wall"
 ```
 
 ## Test
@@ -43,7 +36,7 @@ checked-in reference `testcase.mp3`.
 - `mpglib/` - MP3 decoder support used by the library
 - `include/` - public headers
 - `doc/` - bundled documentation and man page
-- `Dll/`, `ACM/`, `dshow/`, `vc_solution/` - Windows-related build targets
+- `Dll/`, `ACM/`, `dshow/`, `vc_solution/` - legacy Windows-related sources
 
 ## License
 

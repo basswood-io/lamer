@@ -93,7 +93,7 @@ char   *strchr(), *strrchr();
 /*#define IPOW20(x)  exp( -((double)(x)-210)*.1875*LOG2 ) */
 /*#define IPOW20(x)  pow(2.0,-((double)(x)-210)*.1875) */
 
-/* in case this is used without configure */
+/* in case this is used outside the maintained Makefile */
 #ifndef inline
 # define inline
 #endif

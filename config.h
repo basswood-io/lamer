@@ -1,7 +1,3 @@
-/* config.h.  Generated from config.h.in by configure.  */
-/* config.h.in.  Generated from configure.in by autoheader.  */
-
-
 #ifndef LAME_CONFIG_H
 #define LAME_CONFIG_H
 
@@ -206,9 +202,6 @@
 
 /* set to 1 if you have libsndfile */
 /* #undef LIBSNDFILE */
-
-/* Define to the sub-directory where libtool stores uninstalled libraries. */
-#define LT_OBJDIR ".libs/"
 
 /* use MMX version of choose_table */
 /* #undef MMX_choose_table */

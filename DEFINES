@@ -38,8 +38,7 @@ PRECOMPUTE (always on, multiple defines):
  - precomputes blackman window?
 
 USE_GNUC_ASM:
- - speed optimization
-   (should move into configure.in)
+- speed optimization
+   (should move into the maintained Makefile if used)
 
 ... alot of #if 0 / #if 1 not evaluated ...
-
