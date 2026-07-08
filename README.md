@@ -30,6 +30,9 @@ make install PREFIX=/usr/local
 This installs `lib/libmp3lame.a` and `include/lame/lame.h`. Use `DESTDIR` for
 staged packaging installs.
 
+The install target also writes `lib/pkgconfig/mp3lame.pc` for consumers that
+discover the library through pkg-config.
+
 Override the compiler or flags when needed:
 
 ```sh
