@@ -37,7 +37,6 @@ jobs:
           install: >-
             make
             mingw-w64-clang-aarch64-clang
-            mingw-w64-clang-aarch64-ncurses
 
       - name: Build on Ubuntu
         if: runner.os == 'Linux'

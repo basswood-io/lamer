@@ -10,9 +10,14 @@ UNAME := $(shell uname -s)
 CPPFLAGS += -DHAVE_CONFIG_H -I. -Iinclude -Ifrontend -Ilibmp3lame -Impglib
 CFLAGS ?= -O3 -Wall -fno-common
 LDFLAGS ?=
-LDLIBS := -lncurses -lm
+LDLIBS := -lm
 
-ifeq ($(UNAME),Darwin)
+ifneq ($(OS),Windows_NT)
+LDLIBS := -lncurses $(LDLIBS)
+endif
+
+ifeq ($(OS),Windows_NT)
+else ifeq ($(UNAME),Darwin)
 LDLIBS += -liconv
 endif
 

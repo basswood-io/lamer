@@ -17,6 +17,12 @@ char   *strchr(), *strrchr();
 # endif
 #endif
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
+# undef HAVE_NCURSES_TERMCAP_H
+# undef HAVE_TERMCAP_H
+# undef HAVE_TERMCAP
+#endif
+
 #if defined(HAVE_NCURSES_TERMCAP_H)
 # include <ncurses/termcap.h>
 #elif defined(HAVE_TERMCAP_H)
