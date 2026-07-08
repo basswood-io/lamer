@@ -37,9 +37,7 @@
 #include "bitstream.h"
 #include "vbrquantize.h"
 #include "quantize.h"
-#ifdef HAVE_XMMINTRIN_H
 #include "vector/lame_intrin.h"
-#endif
 
 
 
@@ -94,13 +92,14 @@ init_xrpow_core_init(lame_internal_flags * const gfc)
 {
     gfc->init_xrpow_core = init_xrpow_core_c;
 
-#if defined(HAVE_XMMINTRIN_H)
+#if LAME_HAVE_WASM_SIMD_INTRINSICS
+    gfc->init_xrpow_core = init_xrpow_core_wasm;
+#elif LAME_HAVE_SSE_INTRINSICS
+#if defined(__SSE__) || defined(_M_X64) || defined(_M_IX86_FP)
+    gfc->init_xrpow_core = init_xrpow_core_sse;
+#else
     if (gfc->CPU_features.SSE)
         gfc->init_xrpow_core = init_xrpow_core_sse;
-#endif
-#ifndef HAVE_NASM
-#ifdef MIN_ARCH_SSE
-    gfc->init_xrpow_core = init_xrpow_core_sse;
 #endif
 #endif
 }

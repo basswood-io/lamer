@@ -808,7 +808,7 @@ has_SSE(void)
 #ifdef HAVE_NASM
     return has_SSE_nasm();
 #else
-#if defined( _M_X64 ) || defined( MIN_ARCH_SSE )
+#if defined(__SSE__) || defined(_M_X64) || defined(_M_IX86_FP) || defined(MIN_ARCH_SSE)
     return 1;
 #else
     return 0;           /* don't know, assume not */
@@ -822,7 +822,7 @@ has_SSE2(void)
 #ifdef HAVE_NASM
     return has_SSE2_nasm();
 #else
-#if defined( _M_X64 ) || defined( MIN_ARCH_SSE )
+#if defined(__SSE2__) || defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2) || defined(MIN_ARCH_SSE)
     return 1;
 #else
     return 0;           /* don't know, assume not */

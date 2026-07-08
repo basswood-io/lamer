@@ -74,6 +74,7 @@ LIBMP3LAME_SRCS := \
 	libmp3lame/tables.c \
 	libmp3lame/takehiro.c \
 	libmp3lame/util.c \
+	libmp3lame/vector/xmm_quantize_sub.c \
 	libmp3lame/vbrquantize.c \
 	libmp3lame/version.c
 

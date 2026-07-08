@@ -30,10 +30,7 @@
 #include "util.h"
 #include "lame_intrin.h"
 
-
-
-#ifdef HAVE_XMMINTRIN_H
-
+#if LAME_HAVE_SSE_INTRINSICS
 #include <xmmintrin.h>
 
 typedef union {
@@ -66,7 +63,6 @@ init_xrpow_core_sse(gr_info * const cod_info, FLOAT xrpow[576], int upper, FLOAT
     float   tmp_max = 0;
     float   tmp_sum = 0;
     int     upper4 = (upper / 4) * 4;
-    int     rest = upper-upper4;
 
     const vecfloat_union fabs_mask = {{ 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF }};
     const __m128 vec_fabs_mask = _mm_loadu_ps(&fabs_mask._float[0]);
@@ -88,25 +84,6 @@ init_xrpow_core_sse(gr_info * const cod_info, FLOAT xrpow[576], int upper, FLOAT
         vec_xrpow_max._m128 = _mm_max_ps(vec_xrpow_max._m128, vec_tmp._m128); /* retrieve max */
         _mm_storeu_ps(&(xrpow[i]), vec_tmp._m128); /* store into xrpow[] */
     }
-    vec_tmp._m128 = _mm_set_ps1(0);
-    switch (rest) {
-        case 3: vec_tmp._float[2] = cod_info->xr[upper4+2];
-        case 2: vec_tmp._float[1] = cod_info->xr[upper4+1];
-        case 1: vec_tmp._float[0] = cod_info->xr[upper4+0];
-            vec_tmp._m128 = _mm_and_ps(vec_tmp._m128, vec_fabs_mask); /* fabs */
-            vec_sum._m128 = _mm_add_ps(vec_sum._m128, vec_tmp._m128);
-            vec_tmp._m128 = _mm_sqrt_ps(_mm_mul_ps(vec_tmp._m128, _mm_sqrt_ps(vec_tmp._m128)));
-            vec_xrpow_max._m128 = _mm_max_ps(vec_xrpow_max._m128, vec_tmp._m128); /* retrieve max */
-            switch (rest) {
-                case 3: xrpow[upper4+2] = vec_tmp._float[2];
-                case 2: xrpow[upper4+1] = vec_tmp._float[1];
-                case 1: xrpow[upper4+0] = vec_tmp._float[0];
-                default:
-                    break;
-            }
-        default:
-            break;
-    }
     tmp_sum = vec_sum._float[0] + vec_sum._float[1] + vec_sum._float[2] + vec_sum._float[3];
     {
         float ma = vec_xrpow_max._float[0] > vec_xrpow_max._float[1]
@@ -114,6 +91,14 @@ init_xrpow_core_sse(gr_info * const cod_info, FLOAT xrpow[576], int upper, FLOAT
         float mb = vec_xrpow_max._float[2] > vec_xrpow_max._float[3]
                 ? vec_xrpow_max._float[2] : vec_xrpow_max._float[3];
         tmp_max = ma > mb ? ma : mb;
+    }
+    for (i = upper4; i <= upper; ++i) {
+        float const tmp = fabs(cod_info->xr[i]);
+        float const xp = sqrt(tmp * sqrt(tmp));
+        tmp_sum += tmp;
+        xrpow[i] = xp;
+        if (xp > tmp_max)
+            tmp_max = xp;
     }
     cod_info->xrpow_max = tmp_max;
     *sum = tmp_sum;
@@ -236,5 +221,54 @@ fht_SSE2(FLOAT * fz, int n)
     } while (k4 < n);
 }
 
-#endif	/* HAVE_XMMINTRIN_H */
+#endif	/* LAME_HAVE_SSE_INTRINSICS */
 
+
+#if LAME_HAVE_WASM_SIMD_INTRINSICS
+
+#include <wasm_simd128.h>
+
+void
+init_xrpow_core_wasm(gr_info * const cod_info, FLOAT xrpow[576], int upper, FLOAT * sum)
+{
+    int     i;
+    float   tmp_max;
+    float   tmp_sum;
+    int     upper4 = (upper / 4) * 4;
+    v128_t const fabs_mask = wasm_i32x4_splat(0x7fffffff);
+    v128_t vec_sum = wasm_f32x4_splat(0.0f);
+    v128_t vec_xrpow_max = wasm_f32x4_splat(0.0f);
+
+    for (i = 0; i < upper4; i += 4) {
+        v128_t vec_tmp = wasm_v128_load(&cod_info->xr[i]);
+        vec_tmp = wasm_v128_and(vec_tmp, fabs_mask);
+        vec_sum = wasm_f32x4_add(vec_sum, vec_tmp);
+        vec_tmp = wasm_f32x4_sqrt(wasm_f32x4_mul(vec_tmp, wasm_f32x4_sqrt(vec_tmp)));
+        vec_xrpow_max = wasm_f32x4_max(vec_xrpow_max, vec_tmp);
+        wasm_v128_store(&xrpow[i], vec_tmp);
+    }
+
+    tmp_sum = wasm_f32x4_extract_lane(vec_sum, 0)
+            + wasm_f32x4_extract_lane(vec_sum, 1)
+            + wasm_f32x4_extract_lane(vec_sum, 2)
+            + wasm_f32x4_extract_lane(vec_sum, 3);
+    {
+        float const ma = Max(wasm_f32x4_extract_lane(vec_xrpow_max, 0),
+                             wasm_f32x4_extract_lane(vec_xrpow_max, 1));
+        float const mb = Max(wasm_f32x4_extract_lane(vec_xrpow_max, 2),
+                             wasm_f32x4_extract_lane(vec_xrpow_max, 3));
+        tmp_max = Max(ma, mb);
+    }
+    for (i = upper4; i <= upper; ++i) {
+        float const tmp = fabs(cod_info->xr[i]);
+        float const xp = sqrt(tmp * sqrt(tmp));
+        tmp_sum += tmp;
+        xrpow[i] = xp;
+        if (xp > tmp_max)
+            tmp_max = xp;
+    }
+    cod_info->xrpow_max = tmp_max;
+    *sum = tmp_sum;
+}
+
+#endif /* LAME_HAVE_WASM_SIMD_INTRINSICS */

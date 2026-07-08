@@ -43,6 +43,7 @@
 #include "set_get.h"
 #include "quantize.h"
 #include "psymodel.h"
+#include "vector/lame_intrin.h"
 #include "version.h"
 #include "VbrTag.h"
 #include "tables.h"
@@ -1355,7 +1356,7 @@ lame_print_config(const lame_global_flags * gfp)
             fft_asm_used = 2;
         }
 #else
-# if defined( HAVE_XMMINTRIN_H ) && defined( MIN_ARCH_SSE )
+# if LAME_HAVE_SSE_INTRINSICS && (defined(__SSE__) || defined(_M_X64) || defined(_M_IX86_FP))
         {
             fft_asm_used = 3;
         }
@@ -1372,14 +1373,14 @@ lame_print_config(const lame_global_flags * gfp)
             concatSep(text, ", ", (fft_asm_used == 1) ? "3DNow! (ASM used)" : "3DNow!");
         }
         if (gfc->CPU_features.SSE) {
-#if defined(HAVE_XMMINTRIN_H)
-            concatSep(text, ", ", "SSE (ASM used)");
+#if LAME_HAVE_SSE_INTRINSICS
+            concatSep(text, ", ", "SSE (intrinsics)");
 #else
             concatSep(text, ", ", (fft_asm_used == 2) ? "SSE (ASM used)" : "SSE");
 #endif
         }
         if (gfc->CPU_features.SSE2) {
-            concatSep(text, ", ", (fft_asm_used == 3) ? "SSE2 (ASM used)" : "SSE2");
+            concatSep(text, ", ", (fft_asm_used == 3) ? "SSE2 (intrinsics)" : "SSE2");
         }
         MSGF(gfc, "CPU features: %s\n", text);
     }

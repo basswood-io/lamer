@@ -23,11 +23,33 @@
 #ifndef LAME_INTRIN_H
 #define LAME_INTRIN_H
 
+#if !defined(LAME_HAVE_SSE_INTRINSICS)
+# if defined(HAVE_XMMINTRIN_H) || defined(__SSE__) || defined(_M_X64) || defined(_M_IX86_FP)
+#  define LAME_HAVE_SSE_INTRINSICS 1
+# else
+#  define LAME_HAVE_SSE_INTRINSICS 0
+# endif
+#endif
 
+#if !defined(LAME_HAVE_WASM_SIMD_INTRINSICS)
+# if defined(__wasm_simd128__)
+#  define LAME_HAVE_WASM_SIMD_INTRINSICS 1
+# else
+#  define LAME_HAVE_WASM_SIMD_INTRINSICS 0
+# endif
+#endif
+
+#if LAME_HAVE_SSE_INTRINSICS
 void
 init_xrpow_core_sse(gr_info * const cod_info, FLOAT xrpow[576], int upper, FLOAT * sum);
 
 void
 fht_SSE2(FLOAT* , int);
+#endif
+
+#if LAME_HAVE_WASM_SIMD_INTRINSICS
+void
+init_xrpow_core_wasm(gr_info * const cod_info, FLOAT xrpow[576], int upper, FLOAT * sum);
+#endif
 
 #endif
