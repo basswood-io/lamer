@@ -741,8 +741,11 @@ long_help(const lame_global_flags * gfp, FILE * const fp, const char *ProgramNam
     fprintf(fp,
             "    --flush         flush output stream as soon as possible\n"
             "    --freeformat    produce a free format bitstream\n"
+#if defined(HAVE_MPGLIB) || defined(AMIGA_MPEGA)
             "    --decode        input=mp3 file, output=wav\n"
-            "    -t              disable writing wav header when using --decode\n");
+            "    -t              disable writing wav header when using --decode\n"
+#endif
+            );
 
     wait_for(fp, lessmode);
     fprintf(fp,
@@ -1611,6 +1614,7 @@ parse_args_(lame_global_flags * gfp, int argc, char **argv,
                 T_ELIF("big-endian")
                     global_raw_pcm.in_endian = ByteOrderBigEndian;
 
+#if defined(HAVE_MPGLIB) || defined(AMIGA_MPEGA)
                 T_ELIF("mp1input")
                     global_reader.input_format = sf_mp1;
 
@@ -1619,23 +1623,28 @@ parse_args_(lame_global_flags * gfp, int argc, char **argv,
 
                 T_ELIF("mp3input")
                     global_reader.input_format = sf_mp3;
+#endif
 
                 T_ELIF("ogginput")
                     error_printf("sorry, vorbis support in LAME is deprecated.\n");
                 return -1;
 
+#if defined(HAVE_MPGLIB) || defined(AMIGA_MPEGA)
                 T_ELIF("decode")
                     (void) lame_set_decode_only(gfp, 1);
+#endif
 
                 T_ELIF("flush")
                     global_writer.flush_write = 1;
 
+#if defined(HAVE_MPGLIB) || defined(AMIGA_MPEGA)
                 T_ELIF("decode-mp3delay")
                     argUsed = getIntValue(token, nextArg, &int_value);
                     if (argUsed) {
                         global_decoder.mp3_delay = int_value;
                         global_decoder.mp3_delay_set = 1;
                     }
+#endif
 
                 T_ELIF("nores")
                     lame_set_disable_reservoir(gfp, 1);

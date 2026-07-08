@@ -361,7 +361,9 @@ typedef struct get_audio_global_data_struct {
     unsigned int num_samples_read;
     FILE   *music_in;
     SNDFILE *snd_file;
+#ifdef HAVE_MPGLIB
     hip_t   hip;
+#endif
     PcmBuffer pcm32;
     PcmBuffer pcm16;
     size_t  in_id3v2_size;
@@ -372,15 +374,17 @@ static get_audio_global_data global;
 
 
 
-#ifdef AMIGA_MPEGA
+#if defined(AMIGA_MPEGA)
 int     lame_decode_initfile(const char *fullname, mp3data_struct * const mp3data);
-#else
+#elif defined(HAVE_MPGLIB)
 int     lame_decode_initfile(FILE * fd, mp3data_struct * mp3data, int *enc_delay, int *enc_padding);
 #endif
 
+#if defined(AMIGA_MPEGA) || defined(HAVE_MPGLIB)
 /* read mp3 file until mpglib returns one frame of PCM data */
 static int lame_decode_fromfile(FILE * fd, short int pcm_l[], short int pcm_r[],
                                 mp3data_struct * mp3data);
+#endif
 
 
 static int read_samples_pcm(FILE * musicin, int sample_buffer[2304], int samples_to_read);
@@ -604,7 +608,9 @@ init_infile(lame_t gfp, char const *inPath)
     global. pcmswapbytes = global_reader.swapbytes;
     global. pcm_is_unsigned_8bit = global_raw_pcm.in_signed == 1 ? 0 : 1;
     global. pcm_is_ieee_float = 0;
+#ifdef HAVE_MPGLIB
     global. hip = 0;
+#endif
     global. music_in = 0;
     global. snd_file = 0;
     global. in_id3v2_size = 0;
@@ -774,12 +780,16 @@ get_audio_common(lame_t gfp, int buffer[2][1152], short buffer16[2][1152])
     if (global.count_samples_carefully) {
         unsigned int tmp_num_samples;
         /* get num_samples */
+#ifdef HAVE_MPGLIB
         if (is_mpeg_file_format(global_reader.input_format)) {
             tmp_num_samples = global_decoder.mp3input_data.nsamp;
         }
         else {
             tmp_num_samples = lame_get_num_samples(gfp);
         }
+#else
+        tmp_num_samples = lame_get_num_samples(gfp);
+#endif
         if (global.num_samples_read < tmp_num_samples) {
             remaining = tmp_num_samples - global.num_samples_read;
         }
@@ -1775,14 +1785,22 @@ parse_file_header(lame_global_flags * gfp, FILE * sf)
 static int
 open_mpeg_file_part2(lame_t gfp, FILE* musicin, char const *inPath, int *enc_delay, int *enc_padding)
 {
-#ifdef HAVE_MPGLIB
+#ifndef HAVE_MPGLIB
+    (void) gfp;
+    (void) musicin;
+    (void) enc_delay;
+    (void) enc_padding;
+    if (global_ui_config.silent < 10) {
+        error_printf("Error: libmp3lame not compiled with mp3 decoding support for %s.\n", inPath);
+    }
+    return 0;
+#else
     if (-1 == lame_decode_initfile(musicin, &global_decoder.mp3input_data, enc_delay, enc_padding)) {
         if (global_ui_config.silent < 10) {
             error_printf("Error reading headers in mp3 input file %s.\n", inPath);
         }
         return 0;
     }
-#endif
     if (!set_input_num_channels(gfp, global_decoder.mp3input_data.stereo)) {
         return 0;
     }
@@ -1791,6 +1809,7 @@ open_mpeg_file_part2(lame_t gfp, FILE* musicin, char const *inPath, int *enc_del
     }
     (void) lame_set_num_samples(gfp, global_decoder.mp3input_data.nsamp);
     return 1;
+#endif
 }
 
 
@@ -1882,6 +1901,7 @@ open_mpeg_file(lame_t gfp, char const *inPath, int *enc_delay, int *enc_padding)
             return 0;
         }
     }
+#ifdef HAVE_MPGLIB
 #ifdef AMIGA_MPEGA
     if (-1 == lame_decode_initfile(inPath, &global_decoder.mp3input_data)) {
         if (global_ui_config.silent < 10) {
@@ -1891,10 +1911,12 @@ open_mpeg_file(lame_t gfp, char const *inPath, int *enc_delay, int *enc_padding)
         return 0;
     }
 #endif
+#endif
     if ( 0 == open_mpeg_file_part2(gfp, musicin, inPath, enc_delay, enc_padding) ) {
         close_input_file(musicin);
         return 0;
     }
+#ifdef HAVE_MPGLIB
     if (lame_get_num_samples(gfp) == MAX_U_32_NUM && musicin != stdin) {
         double  flen = lame_get_file_size(musicin); /* try to figure out num_samples */
         if (flen >= 0) {
@@ -1911,6 +1933,7 @@ open_mpeg_file(lame_t gfp, char const *inPath, int *enc_delay, int *enc_padding)
             }
         }
     }
+#endif
     return musicin;
 }
 
@@ -2265,11 +2288,13 @@ put_audio16(FILE * outf, short Buffer[2][1152], int iread, int nch)
     }
 }
 
+#ifdef HAVE_MPGLIB
 hip_t
 get_hip(void)
 {
     return global.hip;
 }
+#endif
 
 size_t
 sizeOfOldTag(lame_t gf)

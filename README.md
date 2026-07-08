@@ -18,8 +18,17 @@ Build only the static library:
 make lib
 ```
 
-`libmp3lame/libmp3lame.a` is self-contained and includes the MP3 decoder
-support objects from `mpglib/`.
+By default, `libmp3lame/libmp3lame.a` is self-contained and includes the MP3
+decoder support objects from `mpglib/`.
+
+Build an encoder-only library, matching LAME's old `--disable-decoder` option:
+
+```sh
+make lib DECODER=0
+```
+
+Use the same `DECODER=0` setting with `make`, `make lib`, and `make install`
+when installing an encoder-only build.
 
 Install the static library and public header:
 

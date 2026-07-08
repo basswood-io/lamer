@@ -16,9 +16,6 @@
 #define HAVE_LIMITS_H 1
 #define HAVE_STDINT_H 1
 
-#define HAVE_MPGLIB 1
-#define DECODE_ON_THE_FLY 1
-
 typedef float ieee754_float32_t;
 typedef double ieee754_float64_t;
 typedef long double ieee854_float80_t;

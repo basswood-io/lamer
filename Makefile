@@ -9,6 +9,7 @@ INSTALL_DATA ?= cp -f
 PREFIX ?= /usr/local
 DESTDIR ?=
 VERSION ?= 3.100
+DECODER ?= 1
 
 UNAME := $(shell uname -s)
 AR_VERSION := $(shell $(AR) --version 2>/dev/null)
@@ -26,6 +27,10 @@ endif
 
 ifeq ($(PIC),1)
 override CFLAGS += -fPIC
+endif
+
+ifeq ($(DECODER),1)
+CPPFLAGS += -DHAVE_MPGLIB -DDECODE_ON_THE_FLY
 endif
 
 ifneq ($(OS),Windows_NT)
@@ -70,8 +75,7 @@ LIBMP3LAME_SRCS := \
 	libmp3lame/takehiro.c \
 	libmp3lame/util.c \
 	libmp3lame/vbrquantize.c \
-	libmp3lame/version.c \
-	libmp3lame/mpglib_interface.c
+	libmp3lame/version.c
 
 MPGLIB_SRCS := \
 	mpglib/common.c \
@@ -83,9 +87,17 @@ MPGLIB_SRCS := \
 	mpglib/layer3.c \
 	mpglib/tabinit.c
 
+ifeq ($(DECODER),1)
+LIBMP3LAME_SRCS += libmp3lame/mpglib_interface.c
+endif
+
 FRONTEND_OBJS := $(FRONTEND_SRCS:.c=.o)
 LIBMP3LAME_OBJS := $(LIBMP3LAME_SRCS:.c=.o)
+ifeq ($(DECODER),1)
 MPGLIB_OBJS := $(MPGLIB_SRCS:.c=.o)
+else
+MPGLIB_OBJS :=
+endif
 OBJS := $(FRONTEND_OBJS) $(LIBMP3LAME_OBJS) $(MPGLIB_OBJS)
 DEPS := $(OBJS:.o=.d)
 

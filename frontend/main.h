@@ -69,7 +69,9 @@ typedef struct DecoderConfig
     int   mp3_delay;                /* to adjust the number of samples truncated during decode */
     int   mp3_delay_set;            /* user specified the value of the mp3 encoder delay to assume for decoding */
     int   disable_wav_header;
+#ifdef HAVE_MPGLIB
     mp3data_struct mp3input_data;
+#endif
 } DecoderConfig;
 
 typedef enum ByteOrder { ByteOrderLittleEndian, ByteOrderBigEndian } ByteOrder;

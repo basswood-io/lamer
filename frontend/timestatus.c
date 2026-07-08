@@ -333,6 +333,7 @@ encoder_progress_end( lame_global_flags const* gf )
 
 
 /* these functions are used in get_audio.c */
+#ifdef HAVE_MPGLIB
 static struct DecoderProgress {
     int     last_mode_ext;
     int     frames_total;
@@ -436,3 +437,4 @@ decoder_progress_finish(DecoderProgress dp)
     (void) dp;
     console_printf("\n");
 }
+#endif

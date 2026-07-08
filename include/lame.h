@@ -1024,6 +1024,7 @@ int CDECL lame_encode_finish(
  *
  *********************************************************************/
 
+#ifdef HAVE_MPGLIB
 struct hip_global_struct;
 typedef struct hip_global_struct hip_global_flags;
 typedef hip_global_flags *hip_t;
@@ -1163,6 +1164,7 @@ int CDECL lame_decode1_headersB(
 int CDECL lame_decode_exit(void);
 
 #endif /* obsolete lame_decode API calls */
+#endif /* HAVE_MPGLIB */
 
 
 /*********************************************************************

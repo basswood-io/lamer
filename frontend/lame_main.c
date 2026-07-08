@@ -126,6 +126,7 @@ init_files(lame_global_flags * gf, char const *inPath, char const *outPath)
 }
 
 
+#ifdef HAVE_MPGLIB
 static void
 printInputFormat(lame_t gfp)
 {
@@ -268,6 +269,7 @@ lame_decoder(lame_t gfp, FILE * outf, char *inPath, char *outPath)
     close_infile();     /* close the input file */
     return ret;
 }
+#endif
 
 
 static void
@@ -629,8 +631,15 @@ lame_main(lame_t gf, int argc, char **argv)
     }
 
     if (lame_get_decode_only(gf)) {
+#ifdef HAVE_MPGLIB
         /* decode an mp3 file to a .wav */
         ret = lame_decoder(gf, outf, inPath, outPath);
+#else
+        error_printf("fatal error: this build does not include mp3 decoding support\n");
+        fclose(outf);
+        close_infile();
+        ret = -1;
+#endif
     }
     else if (max_nogap == 0) {
         /* encode a single input file */
