@@ -22,6 +22,7 @@
 #ifndef LAME_LAMETIME_H
 #define LAME_LAMETIME_H
 
+#include <stdio.h>
 #include <sys/types.h>
 #include "lame.h"
 
