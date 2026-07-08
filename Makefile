@@ -8,6 +8,7 @@ MKDIR_P ?= mkdir -p
 INSTALL_DATA ?= cp -f
 PREFIX ?= /usr/local
 DESTDIR ?=
+VERSION ?= 3.100
 
 UNAME := $(shell uname -s)
 AR_VERSION := $(shell $(AR) --version 2>/dev/null)
@@ -110,9 +111,21 @@ test: $(FRONTEND)
 	@{ git diff --numstat --no-index testcase.mp3 testcase.new.mp3 || true; } | awk 'NF { total += $$1 + $$2 } END { print total + 0 }'
 
 install: $(MP3LIB)
-	$(MKDIR_P) $(DESTDIR)$(PREFIX)/lib $(DESTDIR)$(PREFIX)/include/lame
+	$(MKDIR_P) $(DESTDIR)$(PREFIX)/lib $(DESTDIR)$(PREFIX)/include/lame $(DESTDIR)$(PREFIX)/lib/pkgconfig
 	$(INSTALL_DATA) $(MP3LIB) $(DESTDIR)$(PREFIX)/lib/libmp3lame.a
 	$(INSTALL_DATA) include/lame.h $(DESTDIR)$(PREFIX)/include/lame/lame.h
+	{ \
+		echo "prefix=$(PREFIX)"; \
+		echo 'exec_prefix=$${prefix}'; \
+		echo 'libdir=$${exec_prefix}/lib'; \
+		echo 'includedir=$${prefix}/include'; \
+		echo; \
+		echo "Name: mp3lame"; \
+		echo "Description: MPEG Layer 3 audio codec"; \
+		echo "Version: $(VERSION)"; \
+		echo 'Libs: -L$${libdir} -lmp3lame'; \
+		echo 'Cflags: -I$${includedir}'; \
+	} > $(DESTDIR)$(PREFIX)/lib/pkgconfig/mp3lame.pc
 
 clean:
 	$(RM) $(FRONTEND) $(MP3LIB) $(OBJS) $(DEPS) testcase.new.mp3
