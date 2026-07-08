@@ -94,6 +94,8 @@ init_xrpow_core_init(lame_internal_flags * const gfc)
 
 #if LAME_HAVE_WASM_SIMD_INTRINSICS
     gfc->init_xrpow_core = init_xrpow_core_wasm;
+#elif LAME_HAVE_AARCH64_NEON_INTRINSICS
+    gfc->init_xrpow_core = init_xrpow_core_neon;
 #elif LAME_HAVE_SSE_INTRINSICS
 #if defined(__SSE__) || defined(_M_X64) || defined(_M_IX86_FP)
     gfc->init_xrpow_core = init_xrpow_core_sse;

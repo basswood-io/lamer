@@ -224,6 +224,46 @@ fht_SSE2(FLOAT * fz, int n)
 #endif	/* LAME_HAVE_SSE_INTRINSICS */
 
 
+#if LAME_HAVE_AARCH64_NEON_INTRINSICS
+
+#include <arm_neon.h>
+
+void
+init_xrpow_core_neon(gr_info * const cod_info, FLOAT xrpow[576], int upper, FLOAT * sum)
+{
+    int     i;
+    float   tmp_max;
+    float   tmp_sum;
+    int     upper4 = (upper / 4) * 4;
+    float32x4_t vec_sum = vdupq_n_f32(0.0f);
+    float32x4_t vec_xrpow_max = vdupq_n_f32(0.0f);
+
+    for (i = 0; i < upper4; i += 4) {
+        float32x4_t vec_tmp = vld1q_f32(&cod_info->xr[i]);
+        vec_tmp = vabsq_f32(vec_tmp);
+        vec_sum = vaddq_f32(vec_sum, vec_tmp);
+        vec_tmp = vsqrtq_f32(vmulq_f32(vec_tmp, vsqrtq_f32(vec_tmp)));
+        vec_xrpow_max = vmaxq_f32(vec_xrpow_max, vec_tmp);
+        vst1q_f32(&xrpow[i], vec_tmp);
+    }
+
+    tmp_sum = vaddvq_f32(vec_sum);
+    tmp_max = vmaxvq_f32(vec_xrpow_max);
+    for (i = upper4; i <= upper; ++i) {
+        float const tmp = fabs(cod_info->xr[i]);
+        float const xp = sqrt(tmp * sqrt(tmp));
+        tmp_sum += tmp;
+        xrpow[i] = xp;
+        if (xp > tmp_max)
+            tmp_max = xp;
+    }
+    cod_info->xrpow_max = tmp_max;
+    *sum = tmp_sum;
+}
+
+#endif /* LAME_HAVE_AARCH64_NEON_INTRINSICS */
+
+
 #if LAME_HAVE_WASM_SIMD_INTRINSICS
 
 #include <wasm_simd128.h>

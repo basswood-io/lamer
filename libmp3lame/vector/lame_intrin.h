@@ -31,6 +31,14 @@
 # endif
 #endif
 
+#if !defined(LAME_HAVE_AARCH64_NEON_INTRINSICS)
+# if defined(__aarch64__)
+#  define LAME_HAVE_AARCH64_NEON_INTRINSICS 1
+# else
+#  define LAME_HAVE_AARCH64_NEON_INTRINSICS 0
+# endif
+#endif
+
 #if !defined(LAME_HAVE_WASM_SIMD_INTRINSICS)
 # if defined(__wasm_simd128__)
 #  define LAME_HAVE_WASM_SIMD_INTRINSICS 1
@@ -45,6 +53,11 @@ init_xrpow_core_sse(gr_info * const cod_info, FLOAT xrpow[576], int upper, FLOAT
 
 void
 fht_SSE2(FLOAT* , int);
+#endif
+
+#if LAME_HAVE_AARCH64_NEON_INTRINSICS
+void
+init_xrpow_core_neon(gr_info * const cod_info, FLOAT xrpow[576], int upper, FLOAT * sum);
 #endif
 
 #if LAME_HAVE_WASM_SIMD_INTRINSICS
