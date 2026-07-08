@@ -146,7 +146,7 @@ Operational:
 -f             same as -q7
 
 --priority <type>
-               sets the process priority (Windows and OS/2-specific):
+               sets the process priority (Windows-specific):
                      0,1 = Low priority (IDLE_PRIORITY_CLASS)
                      2 = normal priority (NORMAL_PRIORITY_CLASS, defaul
                      3,4 = High priority (HIGH_PRIORITY_CLASS))
@@ -684,13 +684,13 @@ Old compatibility settings. Meaningless
 
 
 =======================================================================
-Windows and OS/2 process priority control
+Windows process priority control
 =======================================================================
 --priority <type>
 
-(Windows and OS/2 only)
+(Windows only)
 
-Sets the process priority for LAME while running under Windows or IBM OS/2.
+Sets the process priority for LAME while running under Windows.
 This can be very useful to avoid the system becoming slow and/or unresponsive. 
 By setting LAME to run in a lower priority, you leave more time for the system 
 to update basic processing (drawing windows, polling keyboard/mouse, etc). The 

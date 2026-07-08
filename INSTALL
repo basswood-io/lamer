@@ -20,6 +20,7 @@ This installs:
 
     $(PREFIX)/lib/libmp3lame.a
     $(PREFIX)/include/lame/lame.h
+    $(PREFIX)/lib/pkgconfig/mp3lame.pc
 
 Use DESTDIR for staged packaging installs:
 

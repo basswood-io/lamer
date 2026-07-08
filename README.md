@@ -57,7 +57,7 @@ checked-in reference `testcase.mp3`.
 - `libmp3lame/` - MP3 encoder library sources
 - `mpglib/` - MP3 decoder support used by the library
 - `include/` - public headers
-- `doc/` - bundled documentation and man page
+- `doc/` - command line man page
 
 ## License
 
