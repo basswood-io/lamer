@@ -68,6 +68,24 @@ checked-in reference `testcase.mp3`.
 - `include/` - public headers
 - `doc/` - command line man page
 
-## License
+## Changes from the Original Source
 
-See `LICENSE` for the project license.
+This tree keeps the LAME encoder code while removing dead source paths and
+tightening code that modern compilers warn about.
+
+- Fixed VBR tag header bit packing so shifts are performed on unsigned values
+  and explicitly narrowed back to bytes. The original macro shifted through
+  signed integer types, which could hit implementation-defined or undefined
+  behavior when constructing MPEG header bytes.
+- Fixed floating-point comparisons in preset and machine helper macros by
+  casting operands to `double` before calling `fabs`. That avoids accidental
+  precision changes and keeps the call type consistent across C libraries.
+- Corrected psychoacoustic function declarations so array parameters match the
+  implementation, including the four-entry energy buffer used for left, right,
+  mid, and side channels.
+- Made raw IEEE float PCM conversion cast `INT_MAX` intentionally before
+  scaling, instead of relying on an implicit integer-to-float conversion at the
+  edge of the representable range.
+- Removed stale constants and unused declarations from inactive IEEE754 and
+  AIFF/MPEG paths so strict clang builds no longer depend on dead code.
+
