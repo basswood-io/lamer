@@ -33,12 +33,12 @@
 
 #define SET_OPTION(opt, val, def) if (enforce) \
     (void) lame_set_##opt(gfp, val); \
-    else if (!(fabs(lame_get_##opt(gfp) - def) > 0)) \
+    else if (!(fabs((double) lame_get_##opt(gfp) - (double) (def)) > 0)) \
     (void) lame_set_##opt(gfp, val);
 
 #define SET__OPTION(opt, val, def) if (enforce) \
     lame_set_##opt(gfp, val); \
-    else if (!(fabs(lame_get_##opt(gfp) - def) > 0)) \
+    else if (!(fabs((double) lame_get_##opt(gfp) - (double) (def)) > 0)) \
     lame_set_##opt(gfp, val);
 
 #undef Min

@@ -1265,7 +1265,7 @@ unpack_read_samples(const int samples_to_read, const int bytes_per_sample,
     }
 #undef GA_URS_IFLOOP
     if (global.pcm_is_ieee_float) {
-        ieee754_float32_t const m_max = INT_MAX;
+        ieee754_float32_t const m_max = (ieee754_float32_t) INT_MAX;
         ieee754_float32_t const m_min = -(ieee754_float32_t) INT_MIN;
         ieee754_float32_t *x = (ieee754_float32_t *) sample_buffer;
         assert(sizeof(ieee754_float32_t) == sizeof(int));
@@ -1364,8 +1364,6 @@ static int const IFF_ID_AIFF = 0x41494646; /* "AIFF" */
 static int const IFF_ID_AIFC = 0x41494643; /* "AIFC" */
 static int const IFF_ID_COMM = 0x434f4d4d; /* "COMM" */
 static int const IFF_ID_SSND = 0x53534e44; /* "SSND" */
-static int const IFF_ID_MPEG = 0x4d504547; /* "MPEG" */
-
 static int const IFF_ID_NONE = 0x4e4f4e45; /* "NONE" *//* AIFF-C data format */
 static int const IFF_ID_2CBE = 0x74776f73; /* "twos" *//* AIFF-C data format */
 static int const IFF_ID_2CLE = 0x736f7774; /* "sowt" *//* AIFF-C data format */

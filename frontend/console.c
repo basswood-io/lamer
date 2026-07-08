@@ -95,7 +95,7 @@ get_termcap_string(char const* id, char* dest, size_t n)
     char    tc[16];
     char   *tp = tc;
     tp[0] = '\0';
-    tp = tgetstr(id, &tp);
+    tp = tgetstr((char *) id, &tp);
     if (tp != NULL && dest != NULL && n > 0) {
         strncpy(dest, tp, n);
         dest[n-1] = '\0';
@@ -105,7 +105,7 @@ get_termcap_string(char const* id, char* dest, size_t n)
 static void 
 get_termcap_number(char const* id, int* dest, int low, int high)
 {
-    int const val = tgetnum(id);
+    int const val = tgetnum((char *) id);
     if (low <= val && val <= high) {
         *dest = val;
     }

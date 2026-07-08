@@ -96,7 +96,7 @@ test: $(FRONTEND)
 	@echo
 	@echo "The following output has value only for a LAME-developer, do not make _any_"
 	@echo "assumptions about what this number means. You do not need to care about it."
-	@cmp -l testcase.new.mp3 testcase.mp3 | wc -l
+	@{ git diff --numstat --no-index testcase.mp3 testcase.new.mp3 || true; } | awk 'NF { total += $$1 + $$2 } END { print total + 0 }'
 
 clean:
 	$(RM) $(FRONTEND) $(MP3LIB) $(MPGLIB) $(OBJS) $(DEPS) testcase.new.mp3
