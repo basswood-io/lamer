@@ -8,8 +8,8 @@ TODO
   - command line frontend build
   - install staging
   - smoke test
-- Review config.h and configMS.h periodically and remove settings that only
-  supported deleted build systems or deleted platform wrappers.
+- Review config.h periodically and remove settings that only supported deleted
+  build systems or deleted platform wrappers.
 - Consider whether the command line frontend should remain the default target
   or whether the library-only target should become the primary consumer path.
 - Keep README.md, INSTALL, USAGE, HACKING, and doc/man/lame.1 consistent with
