@@ -67,6 +67,10 @@ char   *strchr(), *strrchr();
 #endif
 
                  
+#if defined(_WIN32) && !defined(__CYGWIN__)
+# undef HAVE_ICONV
+#endif
+
 #ifdef HAVE_ICONV
 #include <iconv.h>
 #include <errno.h>
