@@ -14,6 +14,7 @@ UNAME := $(shell uname -s)
 AR_VERSION := $(shell $(AR) --version 2>/dev/null)
 
 CPPFLAGS += -DHAVE_CONFIG_H -I. -Iinclude -Ifrontend -Ilibmp3lame -Impglib
+FRONTEND_CPPFLAGS :=
 override CFLAGS += -O3 -Wall -fno-common
 LDFLAGS ?=
 LDLIBS := -lm
@@ -28,6 +29,7 @@ override CFLAGS += -fPIC
 endif
 
 ifneq ($(OS),Windows_NT)
+FRONTEND_CPPFLAGS += -DHAVE_ICONV -DHAVE_TERMCAP -DHAVE_TERMCAP_H
 LDLIBS := -lncurses $(LDLIBS)
 endif
 
@@ -92,6 +94,8 @@ DEPS := $(OBJS:.o=.d)
 all: $(FRONTEND)
 
 lib: $(MP3LIB)
+
+$(FRONTEND_OBJS): CPPFLAGS += $(FRONTEND_CPPFLAGS)
 
 $(FRONTEND): $(FRONTEND_OBJS) $(MP3LIB)
 	$(CC) $(LDFLAGS) -o $@ $(FRONTEND_OBJS) $(MP3LIB) $(LDLIBS)
