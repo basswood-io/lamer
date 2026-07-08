@@ -8,7 +8,7 @@ MKDIR_P ?= mkdir -p
 INSTALL_DATA ?= cp -f
 PREFIX ?= /usr/local
 DESTDIR ?=
-VERSION ?= 3.100
+VERSION ?= 3.100.1
 DECODER ?= 1
 
 UNAME := $(shell uname -s)
