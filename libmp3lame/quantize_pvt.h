@@ -38,11 +38,7 @@ extern const int slen2_tab[16];
 extern const scalefac_struct sfBandIndex[9];
 
 extern FLOAT pow43[PRECALC_SIZE];
-#ifdef TAKEHIRO_IEEE754_HACK
-extern FLOAT adj43asm[PRECALC_SIZE];
-#else
 extern FLOAT adj43[PRECALC_SIZE];
-#endif
 
 #define Q_MAX (256+1)
 #define Q_MAX2 116      /* minimum possible number of

@@ -55,60 +55,13 @@ struct algo_s {
 
 
 
-/*  Remarks on optimizing compilers:
- *
- *  the MSVC compiler may get into aliasing problems when accessing
- *  memory through the fi_union. declaring it volatile does the trick here
- *
- *  the calc_sfb_noise_* functions are not inlined because the intel compiler
- *  optimized executeables won't work as expected anymore
- */
-
-#ifdef _MSC_VER
-#  if _MSC_VER < 1400
-#  define VOLATILE volatile
-#  else
-#  define VOLATILE
-#  endif
-#else
-#  define VOLATILE
-#endif
-
-typedef VOLATILE union {
-    float   f;
-    int     i;
-} fi_union;
-
-
-
-#ifdef TAKEHIRO_IEEE754_HACK
-#define DOUBLEX double
-#else
-#define DOUBLEX FLOAT
-#endif
- 
-#define MAGIC_FLOAT_def (65536*(128))
-#define MAGIC_INT_def    0x4b000000
-
-#ifdef TAKEHIRO_IEEE754_HACK
-#else
 /*********************************************************************
- * XRPOW_FTOI is a macro to convert floats to ints.
- * if XRPOW_FTOI(x) = nearest_int(x), then QUANTFAC(x)=adj43asm[x]
- *                                         ROUNDFAC= -0.0946
- *
- * if XRPOW_FTOI(x) = floor(x), then QUANTFAC(x)=asj43[x]
- *                                   ROUNDFAC=0.4054
+ * Convert quantized floating-point values using truncation and the
+ * adjustment table.
  *********************************************************************/
-#  define QUANTFAC(rx)  adj43[rx]
-#  define ROUNDFAC_def 0.4054f
-#  define XRPOW_FTOI(src,dest) ((dest) = (int)(src))
-#endif
-
-#ifdef TAKEHIRO_IEEE754_HACK
-static int const MAGIC_INT = MAGIC_INT_def;
-static DOUBLEX const MAGIC_FLOAT = MAGIC_FLOAT_def;
-#endif
+#define QUANTFAC(rx) adj43[rx]
+#define ROUNDFAC_def 0.4054f
+#define XRPOW_FTOI(src,dest) ((dest) = (int)(src))
 
 
 inline static  float
@@ -166,29 +119,8 @@ find_lowest_scalefac(const FLOAT xr34)
 
 
 inline static void
-k_34_4(DOUBLEX x[4], int l3[4])
+k_34_4(FLOAT x[4], int l3[4])
 {
-#ifdef TAKEHIRO_IEEE754_HACK
-    fi_union fi[4];
-
-    assert(x[0] <= IXMAX_VAL && x[1] <= IXMAX_VAL && x[2] <= IXMAX_VAL && x[3] <= IXMAX_VAL);
-    x[0] += MAGIC_FLOAT;
-    fi[0].f = x[0];
-    x[1] += MAGIC_FLOAT;
-    fi[1].f = x[1];
-    x[2] += MAGIC_FLOAT;
-    fi[2].f = x[2];
-    x[3] += MAGIC_FLOAT;
-    fi[3].f = x[3];
-    fi[0].f = x[0] + adj43asm[fi[0].i - MAGIC_INT];
-    fi[1].f = x[1] + adj43asm[fi[1].i - MAGIC_INT];
-    fi[2].f = x[2] + adj43asm[fi[2].i - MAGIC_INT];
-    fi[3].f = x[3] + adj43asm[fi[3].i - MAGIC_INT];
-    l3[0] = fi[0].i - MAGIC_INT;
-    l3[1] = fi[1].i - MAGIC_INT;
-    l3[2] = fi[2].i - MAGIC_INT;
-    l3[3] = fi[3].i - MAGIC_INT;
-#else
     assert(x[0] <= IXMAX_VAL && x[1] <= IXMAX_VAL && x[2] <= IXMAX_VAL && x[3] <= IXMAX_VAL);
     XRPOW_FTOI(x[0], l3[0]);
     XRPOW_FTOI(x[1], l3[1]);
@@ -202,7 +134,6 @@ k_34_4(DOUBLEX x[4], int l3[4])
     XRPOW_FTOI(x[1], l3[1]);
     XRPOW_FTOI(x[2], l3[2]);
     XRPOW_FTOI(x[3], l3[3]);
-#endif
 }
 
 
@@ -216,7 +147,7 @@ k_34_4(DOUBLEX x[4], int l3[4])
 static  FLOAT
 calc_sfb_noise_x34(const FLOAT * xr, const FLOAT * xr34, unsigned int bw, uint8_t sf)
 {
-    DOUBLEX x[4];
+    FLOAT x[4];
     int     l3[4];
     const FLOAT sfpow = pow20[sf + Q_MAX2]; /*pow(2.0,sf/4.0); */
     const FLOAT sfpow34 = ipow20[sf]; /*pow(sfpow,-3.0/4.0); */
@@ -499,7 +430,7 @@ block_sf(algo_t * that, const FLOAT l3_xmin[SFBMAX], int vbrsf[SFBMAX], int vbrs
 static void
 quantize_x34(const algo_t * that)
 {
-    DOUBLEX x[4];
+    FLOAT x[4];
     const FLOAT *xr34_orig = that->xr34orig;
     gr_info *const cod_info = that->cod_info;
     int const ifqstep = (cod_info->scalefac_scale == 0) ? 2 : 4;

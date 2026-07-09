@@ -115,3 +115,7 @@ tightening code that modern compilers warn about.
   AIFF/MPEG paths so strict clang builds no longer depend on dead code.
 - Added maintained intrinsic dispatch for native SSE and WebAssembly SIMD while
   keeping scalar C fallbacks for other targets.
+- Backported the LAME 3.101 encoder fixes, including bounded flush output, ABR
+  target-bit accounting, corrected SIMD quantization bounds, faster CRCs, and
+  terminal-width-aware progress output. The obsolete Takehiro IEEE754
+  shortcut has been removed.

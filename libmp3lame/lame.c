@@ -2083,6 +2083,20 @@ lame_init_bitstream(lame_global_flags * gfp)
     return -3;
 }
 
+static int
+calc_mp3buffer_size_remaining(int mp3buffer_size, int mp3count)
+{
+    if (mp3buffer_size == 0)
+        return INT_MAX;
+    if (mp3buffer_size > 0 && mp3count >= 0) {
+        int const remaining = mp3buffer_size - mp3count;
+        if (remaining > 0)
+            return remaining;
+        assert(remaining >= 0);
+    }
+    return -1;
+}
+
 
 /*****************************************************************/
 /* flush internal PCM sample buffers, then mp3 buffers           */
@@ -2150,11 +2164,7 @@ lame_encode_flush(lame_global_flags * gfp, unsigned char *mp3buffer, int mp3buff
         if (bunch > 1152) bunch = 1152;
         if (bunch < 1) bunch = 1;
 
-        mp3buffer_size_remaining = mp3buffer_size - mp3count;
-
-        /* if user specifed buffer size = 0, dont check size */
-        if (mp3buffer_size == 0)
-            mp3buffer_size_remaining = 0;
+        mp3buffer_size_remaining = calc_mp3buffer_size_remaining(mp3buffer_size, mp3count);
 
         /* send in a frame of 0 padding until all internal sample buffers
          * are flushed
@@ -2162,8 +2172,10 @@ lame_encode_flush(lame_global_flags * gfp, unsigned char *mp3buffer, int mp3buff
         imp3 = lame_encode_buffer(gfp, buffer[0], buffer[1], bunch,
                                   mp3buffer, mp3buffer_size_remaining);
 
-        mp3buffer += imp3;
-        mp3count += imp3;
+        if (imp3 > 0) {
+            mp3buffer += imp3;
+            mp3count += imp3;
+        }
         {   /* even a single pcm sample can produce several frames!
              * for example: 1 Hz input file resampled to 8 kHz mpeg2.5
              */
@@ -2182,10 +2194,7 @@ lame_encode_flush(lame_global_flags * gfp, unsigned char *mp3buffer, int mp3buff
         return imp3;
     }
 
-    mp3buffer_size_remaining = mp3buffer_size - mp3count;
-    /* if user specifed buffer size = 0, dont check size */
-    if (mp3buffer_size == 0)
-        mp3buffer_size_remaining = INT_MAX;
+    mp3buffer_size_remaining = calc_mp3buffer_size_remaining(mp3buffer_size, mp3count);
 
     /* mp3 related stuff.  bit buffer might still contain some mp3 data */
     flush_bitstream(gfc);
@@ -2197,10 +2206,7 @@ lame_encode_flush(lame_global_flags * gfp, unsigned char *mp3buffer, int mp3buff
     }
     mp3buffer += imp3;
     mp3count += imp3;
-    mp3buffer_size_remaining = mp3buffer_size - mp3count;
-    /* if user specifed buffer size = 0, dont check size */
-    if (mp3buffer_size == 0)
-        mp3buffer_size_remaining = INT_MAX;
+    mp3buffer_size_remaining = calc_mp3buffer_size_remaining(mp3buffer_size, mp3count);
 
     if (gfp->write_id3tag_automatic) {
         /* write a id3 tag to the bitstream */

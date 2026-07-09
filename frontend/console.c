@@ -298,6 +298,12 @@ console_up(int n_lines)
 #endif
 }
 
+int
+console_getwidth(void)
+{
+    return Console_IO.ClassID == CLASS_ID ? Console_IO.disp_width : 80;
+}
+
 
 void
 set_debug_file(const char *fn)

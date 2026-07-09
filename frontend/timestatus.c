@@ -216,6 +216,7 @@ encoder_progress_begin( lame_global_flags const* gf
     global_encoder_progress.last_time = 0;
     global_encoder_progress.last_frame_num = 0;
     if (global_ui_config.silent < 9) {
+        size_t const path_width = (size_t) (console_getwidth() - 14);
         char* i_file = 0;
         char* o_file = 0;
 #if defined( _WIN32 ) && !defined(__MINGW32__)
@@ -226,7 +227,7 @@ encoder_progress_begin( lame_global_flags const* gf
 
         console_printf("Encoding %s%s to %s\n",
                        strcmp(inPath, "-") ? inPath : "<stdin>",
-                       strlen(inPath) + strlen(outPath) < 66 ? "" : "\n     ",
+                       strlen(inPath) + strlen(outPath) < path_width ? "" : "\n     ",
                        strcmp(outPath, "-") ? outPath : "<stdout>");
 
         free(i_file);

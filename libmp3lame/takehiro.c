@@ -130,89 +130,11 @@ quantize_lines_xrpow_01(unsigned int l, FLOAT istep, const FLOAT * xr, int *ix)
 
 
 
-#ifdef TAKEHIRO_IEEE754_HACK
-
-typedef union {
-    float   f;
-    int     i;
-} fi_union;
-
-#define MAGIC_FLOAT (65536*(128))
-#define MAGIC_INT 0x4b000000
-
-
-static void
-quantize_lines_xrpow(unsigned int l, FLOAT istep, const FLOAT * xp, int *pi)
-{
-    fi_union *fi;
-    unsigned int remaining;
-
-    assert(l > 0);
-
-    fi = (fi_union *) pi;
-
-    l = l >> 1;
-    remaining = l % 2;
-    l = l >> 1;
-    while (l--) {
-        double  x0 = istep * xp[0];
-        double  x1 = istep * xp[1];
-        double  x2 = istep * xp[2];
-        double  x3 = istep * xp[3];
-
-        x0 += MAGIC_FLOAT;
-        fi[0].f = x0;
-        x1 += MAGIC_FLOAT;
-        fi[1].f = x1;
-        x2 += MAGIC_FLOAT;
-        fi[2].f = x2;
-        x3 += MAGIC_FLOAT;
-        fi[3].f = x3;
-
-        fi[0].f = x0 + adj43asm[fi[0].i - MAGIC_INT];
-        fi[1].f = x1 + adj43asm[fi[1].i - MAGIC_INT];
-        fi[2].f = x2 + adj43asm[fi[2].i - MAGIC_INT];
-        fi[3].f = x3 + adj43asm[fi[3].i - MAGIC_INT];
-
-        fi[0].i -= MAGIC_INT;
-        fi[1].i -= MAGIC_INT;
-        fi[2].i -= MAGIC_INT;
-        fi[3].i -= MAGIC_INT;
-        fi += 4;
-        xp += 4;
-    };
-    if (remaining) {
-        double  x0 = istep * xp[0];
-        double  x1 = istep * xp[1];
-
-        x0 += MAGIC_FLOAT;
-        fi[0].f = x0;
-        x1 += MAGIC_FLOAT;
-        fi[1].f = x1;
-
-        fi[0].f = x0 + adj43asm[fi[0].i - MAGIC_INT];
-        fi[1].f = x1 + adj43asm[fi[1].i - MAGIC_INT];
-
-        fi[0].i -= MAGIC_INT;
-        fi[1].i -= MAGIC_INT;
-    }
-
-}
-
-
-#else
 
 /*********************************************************************
- * XRPOW_FTOI is a macro to convert floats to ints.  
- * if XRPOW_FTOI(x) = nearest_int(x), then QUANTFAC(x)=adj43asm[x]
- *                                         ROUNDFAC= -0.0946
- *
+ * XRPOW_FTOI is a macro to convert floats to ints.
  * if XRPOW_FTOI(x) = floor(x), then QUANTFAC(x)=asj43[x]   
  *                                   ROUNDFAC=0.4054
- *
- * Note: using floor() or (int) is extremely slow. On machines where
- * the TAKEHIRO_IEEE754_HACK code above does not work, it is worthwile
- * to write some ASM for XRPOW_FTOI().  
  *********************************************************************/
 #define XRPOW_FTOI(src,dest) ((dest) = (int)(src))
 #define QUANTFAC(rx)  adj43[rx]
@@ -265,10 +187,6 @@ quantize_lines_xrpow(unsigned int l, FLOAT istep, const FLOAT * xr, int *ix)
     }
 
 }
-
-
-
-#endif
 
 
 
