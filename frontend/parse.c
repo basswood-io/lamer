@@ -109,9 +109,7 @@ static int const internal_opts_enabled = INTERNAL_OPTS;
 ReaderConfig global_reader = { sf_unknown, 0, 0, 0, 0 };
 WriterConfig global_writer = { 0 };
 
-UiConfig global_ui_config = {0,0,0,0};
-
-DecoderConfig global_decoder;
+UiConfig global_ui_config = {0,0,0};
 
 RawPCMConfig global_raw_pcm = 
 { /* in_bitwidth */ 16
@@ -441,7 +439,7 @@ print_license(FILE * const fp)
             "Copyright (c) 1999-2011 by The LAME Project\n"
             "Copyright (c) 1999,2000,2001 by Mark Taylor\n"
             "Copyright (c) 1998 by Michael Cheng\n"
-            "Copyright (c) 1995,1996,1997 by Michael Hipp: mpglib\n" "\n");
+            "\n");
     fprintf(fp,
             "This library is free software; you can redistribute it and/or\n"
             "modify it under the terms of the GNU Library General Public\n"
@@ -683,13 +681,6 @@ long_help(const lame_global_flags * gfp, FILE * const fp, const char *ProgramNam
             "    --ignorelength  ignore file length in WAV header\n"
             "    --gain <arg>    apply Gain adjustment in decibels, range -20.0 to +12.0\n"
            );
-#if (defined HAVE_MPGLIB || defined AMIGA_MPEGA)
-    fprintf(fp,
-            "    --mp1input      input file is a MPEG Layer I   file\n"
-            "    --mp2input      input file is a MPEG Layer II  file\n"
-            "    --mp3input      input file is a MPEG Layer III file\n"
-           );
-#endif
     fprintf(fp,
             "    --nogap <file1> <file2> <...>\n"
             "                    gapless encoding for a set of contiguous files\n"
@@ -729,22 +720,11 @@ long_help(const lame_global_flags * gfp, FILE * const fp, const char *ProgramNam
             "                    \"--preset help\" gives more info on these\n"
             "    --comp  <arg>   choose bitrate to achieve a compression ratio of <arg>\n");
     fprintf(fp, "    --replaygain-fast   compute RG fast but slightly inaccurately (default)\n"
-#ifdef DECODE_ON_THE_FLY
-            "    --replaygain-accurate   compute RG more accurately and find the peak sample\n"
-#endif
             "    --noreplaygain  disable ReplayGain analysis\n"
-#ifdef DECODE_ON_THE_FLY
-            "    --clipdetect    enable --replaygain-accurate and print a message whether\n"
-            "                    clipping occurs and how far the waveform is from full scale\n"
-#endif
         );
     fprintf(fp,
             "    --flush         flush output stream as soon as possible\n"
             "    --freeformat    produce a free format bitstream\n"
-#if defined(HAVE_MPGLIB) || defined(AMIGA_MPEGA)
-            "    --decode        input=mp3 file, output=wav\n"
-            "    -t              disable writing wav header when using --decode\n"
-#endif
             );
 
     wait_for(fp, lessmode);
@@ -1528,10 +1508,6 @@ parse_args_(lame_global_flags * gfp, int argc, char **argv,
     /* turn on display options. user settings may turn them off below */
     global_ui_config.silent = 0; /* default */
     global_ui_config.brhist = 1;
-    global_decoder.mp3_delay = 0;
-    global_decoder.mp3_delay_set = 0;
-    global_decoder.disable_wav_header = 0;
-    global_ui_config.print_clipping_info = 0;
     id3tag_init(gfp);
 
     /* process args */
@@ -1614,37 +1590,15 @@ parse_args_(lame_global_flags * gfp, int argc, char **argv,
                 T_ELIF("big-endian")
                     global_raw_pcm.in_endian = ByteOrderBigEndian;
 
-#if defined(HAVE_MPGLIB) || defined(AMIGA_MPEGA)
-                T_ELIF("mp1input")
-                    global_reader.input_format = sf_mp1;
-
-                T_ELIF("mp2input")
-                    global_reader.input_format = sf_mp2;
-
-                T_ELIF("mp3input")
-                    global_reader.input_format = sf_mp3;
-#endif
 
                 T_ELIF("ogginput")
                     error_printf("sorry, vorbis support in LAME is deprecated.\n");
                 return -1;
 
-#if defined(HAVE_MPGLIB) || defined(AMIGA_MPEGA)
-                T_ELIF("decode")
-                    (void) lame_set_decode_only(gfp, 1);
-#endif
 
                 T_ELIF("flush")
                     global_writer.flush_write = 1;
 
-#if defined(HAVE_MPGLIB) || defined(AMIGA_MPEGA)
-                T_ELIF("decode-mp3delay")
-                    argUsed = getIntValue(token, nextArg, &int_value);
-                    if (argUsed) {
-                        global_decoder.mp3_delay = int_value;
-                        global_decoder.mp3_delay_set = 1;
-                    }
-#endif
 
                 T_ELIF("nores")
                     lame_set_disable_reservoir(gfp, 1);
@@ -1705,22 +1659,12 @@ parse_args_(lame_global_flags * gfp, int argc, char **argv,
                 T_ELIF("replaygain-fast")
                     lame_set_findReplayGain(gfp, 1);
 
-#ifdef DECODE_ON_THE_FLY
-                T_ELIF("replaygain-accurate")
-                    lame_set_decode_on_the_fly(gfp, 1);
-                lame_set_findReplayGain(gfp, 1);
-#endif
 
                 T_ELIF("noreplaygain")
                     noreplaygain = 1;
                 lame_set_findReplayGain(gfp, 0);
 
 
-#ifdef DECODE_ON_THE_FLY
-                T_ELIF("clipdetect")
-                    global_ui_config.print_clipping_info = 1;
-                    lame_set_decode_on_the_fly(gfp, 1);
-#endif
 
                 T_ELIF("nohist")
                     global_ui_config.brhist = 0;
@@ -2321,12 +2265,10 @@ parse_args_(lame_global_flags * gfp, int argc, char **argv,
                         break;
                     case 't': /* dont write VBR tag */
                         (void) lame_set_bWriteVbrTag(gfp, 0);
-                        global_decoder.disable_wav_header = 1;
                         break;
                     case 'T': /* do write VBR tag */
                         (void) lame_set_bWriteVbrTag(gfp, 1);
                         nogap_tags = 1;
-                        global_decoder.disable_wav_header = 0;
                         break;
                     case 'r': /* force raw pcm input file */
 #if defined(LIBSNDFILE)
@@ -2471,11 +2413,6 @@ parse_args_(lame_global_flags * gfp, int argc, char **argv,
         return -1;
     }
 
-    if (lame_get_decode_only(gfp) && count_nogap > 0) {
-        error_printf("combination of nogap and decode not supported!\n");
-        return -1;
-    }
-
     if (inPath[0] == '-') {
         if (global_ui_config.silent == 0) { /* user didn't overrule default behaviour */
             global_ui_config.silent = 1;
@@ -2496,8 +2433,7 @@ parse_args_(lame_global_flags * gfp, int argc, char **argv,
             strcpy(outPath, "-");
         }
         else {
-            char const* s_ext = lame_get_decode_only(gfp) ? ".wav" : ".mp3";
-            if (generateOutPath(inPath, outDir, s_ext, outPath) != 0) {
+            if (generateOutPath(inPath, outDir, ".mp3", outPath) != 0) {
                 return -1;
             }
         }
@@ -2522,12 +2458,10 @@ parse_args_(lame_global_flags * gfp, int argc, char **argv,
     if (global_reader.input_format == sf_unknown)
         global_reader.input_format = filename_to_type(inPath);
 
-#if !(defined HAVE_MPGLIB || defined AMIGA_MPEGA)
     if (is_mpeg_file_format(global_reader.input_format)) {
-        error_printf("Error: libmp3lame not compiled with mpg123 *decoding* support \n");
+        error_printf("Error: MPEG audio input is not supported\n");
         return -1;
     }
-#endif
 
     /* default guess for number of channels */
     if (autoconvert)

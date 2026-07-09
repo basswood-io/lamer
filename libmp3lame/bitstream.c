@@ -987,68 +987,6 @@ format_bitstream(lame_internal_flags * gfc)
 static int
 do_gain_analysis(lame_internal_flags * gfc, unsigned char* buffer, int minimum)
 {
-#ifdef DECODE_ON_THE_FLY
-    SessionConfig_t const *const cfg = &gfc->cfg;
-    RpgStateVar_t const *const rsv = &gfc->sv_rpg;
-    RpgResult_t *const rov = &gfc->ov_rpg;
-    if (cfg->decode_on_the_fly) { /* decode the frame */
-        sample_t pcm_buf[2][1152];
-        int     mp3_in = minimum;
-        int     samples_out = -1;
-
-        /* re-synthesis to pcm.  Repeat until we get a samples_out=0 */
-        while (samples_out != 0) {
-
-            samples_out = hip_decode1_unclipped(gfc->hip, buffer, mp3_in, pcm_buf[0], pcm_buf[1]);
-            /* samples_out = 0:  need more data to decode
-             * samples_out = -1:  error.  Lets assume 0 pcm output
-             * samples_out = number of samples output */
-
-            /* set the lenght of the mp3 input buffer to zero, so that in the
-             * next iteration of the loop we will be querying mpglib about
-             * buffered data */
-            mp3_in = 0;
-
-            if (samples_out == -1) {
-                /* error decoding. Not fatal, but might screw up
-                 * the ReplayGain tag. What should we do? Ignore for now */
-                samples_out = 0;
-            }
-            if (samples_out > 0) {
-                /* process the PCM data */
-
-                /* this should not be possible, and indicates we have
-                 * overflown the pcm_buf buffer */
-                assert(samples_out <= 1152);
-
-                if (cfg->findPeakSample) {
-                    int     i;
-                    /* FIXME: is this correct? maybe Max(fabs(pcm),PeakSample) */
-                    for (i = 0; i < samples_out; i++) {
-                        if (pcm_buf[0][i] > rov->PeakSample)
-                            rov->PeakSample = pcm_buf[0][i];
-                        else if (-pcm_buf[0][i] > rov->PeakSample)
-                            rov->PeakSample = -pcm_buf[0][i];
-                    }
-                    if (cfg->channels_out > 1)
-                        for (i = 0; i < samples_out; i++) {
-                            if (pcm_buf[1][i] > rov->PeakSample)
-                                rov->PeakSample = pcm_buf[1][i];
-                            else if (-pcm_buf[1][i] > rov->PeakSample)
-                                rov->PeakSample = -pcm_buf[1][i];
-                        }
-                }
-
-                if (cfg->findReplayGain)
-                    if (AnalyzeSamples
-                        (rsv->rgdata, pcm_buf[0], pcm_buf[1], samples_out,
-                         cfg->channels_out) == GAIN_ANALYSIS_ERROR)
-                        return -6;
-
-            }       /* if (samples_out>0) */
-        }           /* while (samples_out!=0) */
-    }               /* if (gfc->decode_on_the_fly) */
-#endif
     return minimum;
 }
 

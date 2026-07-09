@@ -17,18 +17,8 @@ Build only the static library:
 make lib
 ```
 
-By default, `libmp3lame/libmp3lame.a` is self-contained and includes the MP3
-decoder support objects from `mpglib/`.
-
-Build an encoder-only library, matching LAME's old `--disable-decoder` option.
-This is useful for consumers that already rely on ffmpeg or another decoder:
-
-```sh
-make lib DECODER=0
-```
-
-Use the same `DECODER=0` setting with `make`, `make lib`, and `make install`
-when installing an encoder-only build.
+`libmp3lame/libmp3lame.a` contains the MP3 encoder only. Use FFmpeg or another
+dedicated library when MP3 decoding is required.
 
 Install the static library and public header:
 
@@ -54,7 +44,6 @@ Useful build variables:
 - `CC`, `AR`, `RANLIB` - toolchain programs
 - `CFLAGS`, `CPPFLAGS`, `LDFLAGS` - extra compile and link flags
 - `PIC=1` - add `-fPIC` for static libraries later linked into shared objects
-- `DECODER=0` - omit `mpglib` decoder support
 - `PREFIX`, `DESTDIR` - install location and packaging root
 
 ## WebAssembly
@@ -62,7 +51,7 @@ Useful build variables:
 Build a WebAssembly SIMD static library with Emscripten:
 
 ```sh
-make lib DECODER=0 CC=emcc AR=emar RANLIB=emranlib CFLAGS="-msimd128"
+make lib CC=emcc AR=emar RANLIB=emranlib CFLAGS="-msimd128"
 ```
 
 When `-msimd128` enables `__wasm_simd128__`, `libmp3lame` uses WebAssembly SIMD
@@ -84,7 +73,6 @@ checked-in reference `testcase.mp3`.
 
 - `frontend/` - command line encoder sources
 - `libmp3lame/` - MP3 encoder library sources
-- `mpglib/` - MP3 decoder support used by the library
 - `include/` - public headers
 - `doc/` - command line man page
 

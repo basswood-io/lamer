@@ -1283,10 +1283,6 @@ lame_init_params(lame_global_flags * gfp)
 
 
     cfg->findReplayGain = gfp->findReplayGain;
-    cfg->decode_on_the_fly = gfp->decode_on_the_fly;
-
-    if (cfg->decode_on_the_fly)
-        cfg->findPeakSample = 1;
 
     if (cfg->findReplayGain) {
         if (InitGainAnalysis(gfc->sv_rpg.rgdata, cfg->samplerate_out) == INIT_GAIN_ANALYSIS_ERROR) {
@@ -1298,18 +1294,6 @@ lame_init_params(lame_global_flags * gfp)
         }
     }
 
-#ifdef DECODE_ON_THE_FLY
-    if (cfg->decode_on_the_fly && !gfp->decode_only) {
-        if (gfc->hip) {
-            hip_decode_exit(gfc->hip);
-        }
-        gfc->hip = hip_decode_init();
-        /* report functions */
-        hip_set_errorf(gfc->hip, gfp->report.errorf);
-        hip_set_debugf(gfc->hip, gfp->report.debugf);
-        hip_set_msgf(gfc->hip, gfp->report.msgf);
-    }
-#endif
     /* updating lame internal flags finished successful */
     gfc->lame_init_params_successful = 1;
     return 0;
@@ -1612,16 +1596,6 @@ save_gain_values(lame_internal_flags * gfc)
         }
     }
 
-    /* find the gain and scale change required for no clipping */
-    if (cfg->findPeakSample) {
-        rov->noclipGainChange = (int) ceil(log10(rov->PeakSample / 32767.0) * 20.0 * 10.0); /* round up */
-
-        if (rov->noclipGainChange > 0) { /* clipping occurs */
-            rov->noclipScale = floor((32767.0f / rov->PeakSample) * 100.0f) / 100.0f; /* round down */
-        }
-        else            /* no clipping */
-            rov->noclipScale = -1.0f;
-    }
 }
 
 
@@ -1750,7 +1724,7 @@ lame_encode_buffer_sample_t(lame_internal_flags * gfc,
         fill_buffer(gfc, mfbuf, &in_buffer_ptr[0], nsamples, &n_in, &n_out);
 
         /* compute ReplayGain of resampled input if requested */
-        if (cfg->findReplayGain && !cfg->decode_on_the_fly)
+        if (cfg->findReplayGain)
             if (AnalyzeSamples
                 (gfc->sv_rpg.rgdata, &mfbuf[0][esv->mf_size], &mfbuf[1][esv->mf_size], n_out,
                  cfg->channels_out) == GAIN_ANALYSIS_ERROR)
@@ -2070,7 +2044,6 @@ lame_init_bitstream(lame_global_flags * gfp)
             memset(gfc->ov_enc.bitrate_blocktype_hist, 0,
                    sizeof(gfc->ov_enc.bitrate_blocktype_hist));
 
-            gfc->ov_rpg.PeakSample = 0.0;
 
             /* Write initial VBR Header to bitstream and init VBR data */
             if (gfc->cfg.write_lame_tag)
@@ -2342,9 +2315,7 @@ lame_init_internal_flags(lame_internal_flags* gfc)
 
     gfc->cfg.vbr_min_bitrate_index = 1; /* not  0 ????? */
     gfc->cfg.vbr_max_bitrate_index = 13; /* not 14 ????? */
-    gfc->cfg.decode_on_the_fly = 0;
     gfc->cfg.findReplayGain = 0;
-    gfc->cfg.findPeakSample = 0;
 
     gfc->sv_qnt.OldValue[0] = 180;
     gfc->sv_qnt.OldValue[1] = 180;
@@ -2368,8 +2339,6 @@ lame_init_internal_flags(lame_internal_flags* gfc)
     gfc->ov_enc.encoder_delay = ENCDELAY;
 
     gfc->ov_rpg.RadioGain = 0;
-    gfc->ov_rpg.noclipGainChange = 0;
-    gfc->ov_rpg.noclipScale = -1.0;
 
     gfc->ATH = lame_calloc(ATH_t, 1);
     if (NULL == gfc->ATH)
@@ -2448,7 +2417,6 @@ lame_init_old(lame_global_flags * gfp)
     gfp->interChRatio = -1;
 
     gfp->findReplayGain = 0;
-    gfp->decode_on_the_fly = 0;
 
     gfp->asm_optimizations.mmx = 1;
     gfp->asm_optimizations.amd3dnow = 1;

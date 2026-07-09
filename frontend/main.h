@@ -60,19 +60,8 @@ typedef struct UiConfig
 {
     int   silent;                   /* Verbosity */
     int   brhist;
-    int   print_clipping_info;      /* print info whether waveform clips */
     float update_interval;          /* to use Frank's time status display */
 } UiConfig;
-
-typedef struct DecoderConfig
-{
-    int   mp3_delay;                /* to adjust the number of samples truncated during decode */
-    int   mp3_delay_set;            /* user specified the value of the mp3 encoder delay to assume for decoding */
-    int   disable_wav_header;
-#ifdef HAVE_MPGLIB
-    mp3data_struct mp3input_data;
-#endif
-} DecoderConfig;
 
 typedef enum ByteOrder { ByteOrderLittleEndian, ByteOrderBigEndian } ByteOrder;
 
@@ -86,7 +75,6 @@ typedef struct RawPCMConfig
 extern ReaderConfig global_reader;
 extern WriterConfig global_writer;
 extern UiConfig global_ui_config;
-extern DecoderConfig global_decoder;
 extern RawPCMConfig global_raw_pcm;
 
 

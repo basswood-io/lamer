@@ -281,35 +281,6 @@ lame_get_bWriteVbrTag(const lame_global_flags * gfp)
 
 
 
-/* decode only, use lame/mpglib to convert mp3 to wav */
-int
-lame_set_decode_only(lame_global_flags * gfp, int decode_only)
-{
-    if (is_lame_global_flags_valid(gfp)) {
-        /* default = 0 (disabled) */
-
-        /* enforce disable/enable meaning, if we need more than two values
-           we need to switch to an enum to have an apropriate representation
-           of the possible meanings of the value */
-        if (0 > decode_only || 1 < decode_only)
-            return -1;
-        gfp->decode_only = decode_only;
-        return 0;
-    }
-    return -1;
-}
-
-int
-lame_get_decode_only(const lame_global_flags * gfp)
-{
-    if (is_lame_global_flags_valid(gfp)) {
-        assert(0 <= gfp->decode_only && 1 >= gfp->decode_only);
-        return gfp->decode_only;
-    }
-    return 0;
-}
-
-
 #if DEPRECATED_OR_OBSOLETE_CODE_REMOVED
 /* 1=encode a Vorbis .ogg file.  default=0 */
 /* DEPRECATED */
@@ -528,74 +499,7 @@ lame_get_findReplayGain(const lame_global_flags * gfp)
 }
 
 
-/* Decode on the fly. Find the peak sample. If ReplayGain analysis is 
-   enabled then perform it on the decoded data. */
-int
-lame_set_decode_on_the_fly(lame_global_flags * gfp, int decode_on_the_fly)
-{
-    if (is_lame_global_flags_valid(gfp)) {
-#ifndef DECODE_ON_THE_FLY
-        return -1;
-#else
-        /* default = 0 (disabled) */
-
-        /* enforce disable/enable meaning, if we need more than two values
-           we need to switch to an enum to have an apropriate representation
-           of the possible meanings of the value */
-        if (0 > decode_on_the_fly || 1 < decode_on_the_fly)
-            return -1;
-
-        gfp->decode_on_the_fly = decode_on_the_fly;
-
-        return 0;
-#endif
-    }
-    return -1;
-}
-
-int
-lame_get_decode_on_the_fly(const lame_global_flags * gfp)
-{
-    if (is_lame_global_flags_valid(gfp)) {
-        assert(0 <= gfp->decode_on_the_fly && 1 >= gfp->decode_on_the_fly);
-        return gfp->decode_on_the_fly;
-    }
-    return 0;
-}
-
-#if DEPRECATED_OR_OBSOLETE_CODE_REMOVED
-/* DEPRECATED: now does the same as lame_set_findReplayGain()
-   default = 0 (disabled) */
-int CDECL lame_set_ReplayGain_input(lame_global_flags *, int);
-int CDECL lame_get_ReplayGain_input(const lame_global_flags *);
-
-/* DEPRECATED: now does the same as
-   lame_set_decode_on_the_fly() && lame_set_findReplayGain()
-   default = 0 (disabled) */
-int CDECL lame_set_ReplayGain_decode(lame_global_flags *, int);
-int CDECL lame_get_ReplayGain_decode(const lame_global_flags *);
-
-/* DEPRECATED: now does the same as lame_set_decode_on_the_fly()
-   default = 0 (disabled) */
-int CDECL lame_set_findPeakSample(lame_global_flags *, int);
-int CDECL lame_get_findPeakSample(const lame_global_flags *);
-#else
-#endif
-
-/* DEPRECATED. same as lame_set_decode_on_the_fly() */
-int
-lame_set_findPeakSample(lame_global_flags * gfp, int arg)
-{
-    return lame_set_decode_on_the_fly(gfp, arg);
-}
-
-int
-lame_get_findPeakSample(const lame_global_flags * gfp)
-{
-    return lame_get_decode_on_the_fly(gfp);
-}
-
-/* DEPRECATED. same as lame_set_findReplayGain() */
+/* Deprecated alias for ReplayGain analysis. */
 int
 lame_set_ReplayGain_input(lame_global_flags * gfp, int arg)
 {
@@ -606,26 +510,6 @@ int
 lame_get_ReplayGain_input(const lame_global_flags * gfp)
 {
     return lame_get_findReplayGain(gfp);
-}
-
-/* DEPRECATED. same as lame_set_decode_on_the_fly() &&
-   lame_set_findReplayGain() */
-int
-lame_set_ReplayGain_decode(lame_global_flags * gfp, int arg)
-{
-    if (lame_set_decode_on_the_fly(gfp, arg) < 0 || lame_set_findReplayGain(gfp, arg) < 0)
-        return -1;
-    else
-        return 0;
-}
-
-int
-lame_get_ReplayGain_decode(const lame_global_flags * gfp)
-{
-    if (lame_get_decode_on_the_fly(gfp) > 0 && lame_get_findReplayGain(gfp) > 0)
-        return 1;
-    else
-        return 0;
 }
 
 
@@ -2088,43 +1972,6 @@ lame_get_AudiophileGain(const lame_global_flags * gfp)
     }
     return 0;
 }
-
-float
-lame_get_PeakSample(const lame_global_flags * gfp)
-{
-    if (is_lame_global_flags_valid(gfp)) {
-        lame_internal_flags const *const gfc = gfp->internal_flags;
-        if (is_lame_internal_flags_valid(gfc)) {
-            return (float) gfc->ov_rpg.PeakSample;
-        }
-    }
-    return 0;
-}
-
-int
-lame_get_noclipGainChange(const lame_global_flags * gfp)
-{
-    if (is_lame_global_flags_valid(gfp)) {
-        lame_internal_flags const *const gfc = gfp->internal_flags;
-        if (is_lame_internal_flags_valid(gfc)) {
-            return gfc->ov_rpg.noclipGainChange;
-        }
-    }
-    return 0;
-}
-
-float
-lame_get_noclipScale(const lame_global_flags * gfp)
-{
-    if (is_lame_global_flags_valid(gfp)) {
-        lame_internal_flags const *const gfc = gfp->internal_flags;
-        if (is_lame_internal_flags_valid(gfc)) {
-            return gfc->ov_rpg.noclipScale;
-        }
-    }
-    return 0;
-}
-
 
 /*
  * LAME's estimate of the total number of frames to be encoded.

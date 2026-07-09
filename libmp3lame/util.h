@@ -346,10 +346,7 @@ extern  "C" {
 
 
     typedef struct {
-        FLOAT   noclipScale; /* user-specified scale factor required for preventing clipping */
-        sample_t PeakSample;
         int     RadioGain;
-        int     noclipGainChange; /* gain change required for preventing clipping */
     } RpgResult_t;
 
 
@@ -406,8 +403,6 @@ extern  "C" {
         int     enforce_min_bitrate; /* strictly enforce VBR_min_bitrate normaly, it will be violated for analog silence */
 
         int     findReplayGain; /* find the RG value? default=0       */
-        int     findPeakSample;
-        int     decode_on_the_fly; /* decode on the fly? default=0                */
         int     analysis;
         int     disable_reservoir;
         int     buffer_constraint;  /* enforce ISO spec as much as possible   */
@@ -530,9 +525,6 @@ extern  "C" {
 
         /* used by the frame analyzer */
         plotting_data *pinfo;
-#ifdef DECODE_ON_THE_FLY
-        hip_t hip;
-#endif
 
         /* functions to replace with CPU feature optimized versions in takehiro.c */
         int     (*choose_table) (const int *ix, const int *const end, int *const s);
@@ -577,15 +569,6 @@ extern  "C" {
                         sample_t *const mfbuf[2],
                         sample_t const *const in_buffer[2], int nsamples, int *n_in, int *n_out);
 
-#ifdef DECODE_ON_THE_FLY
-/* same as lame_decode1 (look in lame.h), but returns
-   unclipped raw floating-point samples. It is declared
-   here, not in lame.h, because it returns LAME's
-   internal type sample_t. No more than 1152 samples
-   per channel are allowed. */
-    int     hip_decode1_unclipped(hip_t hip, unsigned char *mp3buf,
-                                   size_t len, sample_t pcm_l[], sample_t pcm_r[]);
-#endif
 
 
     extern int has_MMX(void);
@@ -612,9 +595,6 @@ extern  "C" {
 
     int     is_lame_internal_flags_valid(const lame_internal_flags * gfp);
     
-#ifdef DECODE_ON_THE_FLY
-    extern void hip_set_pinfo(hip_t hip, plotting_data* pinfo);
-#endif
 
 #ifdef __cplusplus
 }

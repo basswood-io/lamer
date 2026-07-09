@@ -30,8 +30,6 @@ lame_get_analysis	@17
 lame_set_bWriteVbrTag	@18
 lame_get_bWriteVbrTag	@19
 
-lame_set_decode_only	@20
-lame_get_decode_only	@21
 
 lame_set_quality	@22
 lame_get_quality	@23
@@ -49,8 +47,6 @@ lame_get_free_format	@29
 lame_set_findReplayGain	@30
 lame_get_findReplayGain	@31
 
-lame_set_decode_on_the_fly	@32
-lame_get_decode_on_the_fly	@33
 
 lame_set_nogap_total	@34
 lame_get_nogap_total	@35
@@ -202,9 +198,6 @@ lame_get_totalframes	@133
 
 lame_get_RadioGain	@134
 lame_get_AudiophileGain	@135
-lame_get_PeakSample	@136
-lame_get_noclipGainChange	@137
-lame_get_noclipScale	@138
 
 lame_init_params	@139
 
@@ -253,21 +246,6 @@ lame_get_bitrate	@502
 lame_get_samplerate	@503
 lame_get_maximum_number_of_samples	@504
 
-lame_decode_init	@1000
-lame_decode		@1001
-lame_decode_headers	@1002
-lame_decode1		@1003
-lame_decode1_headers	@1004
-lame_decode1_headersB	@1005
-lame_decode_exit	@1006
-
-hip_decode_init	@1100
-hip_decode_exit	@1101
-hip_decode		@1102
-hip_decode_headers	@1103
-hip_decode1		@1104
-hip_decode1_headers	@1105
-hip_decode1_headersB	@1106
 hip_set_debugf	@1107
 hip_set_errorf	@1108
 hip_set_msgf	@1109

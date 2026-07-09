@@ -9,12 +9,11 @@ INSTALL_DATA ?= cp -f
 PREFIX ?= /usr/local
 DESTDIR ?=
 VERSION ?= 3.101
-DECODER ?= 1
 
 UNAME := $(shell uname -s)
 AR_VERSION := $(shell $(AR) --version 2>/dev/null)
 
-CPPFLAGS += -DHAVE_CONFIG_H -I. -Iinclude -Ifrontend -Ilibmp3lame -Impglib
+CPPFLAGS += -DHAVE_CONFIG_H -I. -Iinclude -Ifrontend -Ilibmp3lame
 FRONTEND_CPPFLAGS :=
 override CFLAGS += -O3 -Wall -fno-common
 LDFLAGS ?=
@@ -27,10 +26,6 @@ endif
 
 ifeq ($(PIC),1)
 override CFLAGS += -fPIC
-endif
-
-ifeq ($(DECODER),1)
-CPPFLAGS += -DHAVE_MPGLIB -DDECODE_ON_THE_FLY
 endif
 
 ifneq ($(OS),Windows_NT)
@@ -78,28 +73,9 @@ LIBMP3LAME_SRCS := \
 	libmp3lame/vbrquantize.c \
 	libmp3lame/version.c
 
-MPGLIB_SRCS := \
-	mpglib/common.c \
-	mpglib/dct64_i386.c \
-	mpglib/decode_i386.c \
-	mpglib/interface.c \
-	mpglib/layer1.c \
-	mpglib/layer2.c \
-	mpglib/layer3.c \
-	mpglib/tabinit.c
-
-ifeq ($(DECODER),1)
-LIBMP3LAME_SRCS += libmp3lame/mpglib_interface.c
-endif
-
 FRONTEND_OBJS := $(FRONTEND_SRCS:.c=.o)
 LIBMP3LAME_OBJS := $(LIBMP3LAME_SRCS:.c=.o)
-ifeq ($(DECODER),1)
-MPGLIB_OBJS := $(MPGLIB_SRCS:.c=.o)
-else
-MPGLIB_OBJS :=
-endif
-OBJS := $(FRONTEND_OBJS) $(LIBMP3LAME_OBJS) $(MPGLIB_OBJS)
+OBJS := $(FRONTEND_OBJS) $(LIBMP3LAME_OBJS)
 DEPS := $(OBJS:.o=.d)
 
 .PHONY: all clean install lib test
@@ -113,8 +89,8 @@ $(FRONTEND_OBJS): CPPFLAGS += $(FRONTEND_CPPFLAGS)
 $(FRONTEND): $(FRONTEND_OBJS) $(MP3LIB)
 	$(CC) $(LDFLAGS) -o $@ $(FRONTEND_OBJS) $(MP3LIB) $(LDLIBS)
 
-$(MP3LIB): $(LIBMP3LAME_OBJS) $(MPGLIB_OBJS)
-	$(AR) $(ARFLAGS) $@ $(LIBMP3LAME_OBJS) $(MPGLIB_OBJS)
+$(MP3LIB): $(LIBMP3LAME_OBJS)
+	$(AR) $(ARFLAGS) $@ $(LIBMP3LAME_OBJS)
 	$(RANLIB) $@
 
 %.o: %.c config.h Makefile

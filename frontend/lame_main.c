@@ -117,7 +117,7 @@ init_files(lame_global_flags * gf, char const *inPath, char const *outPath)
         error_printf("Can't init infile '%s'\n", inPath);
         return NULL;
     }
-    if ((outf = init_outfile(outPath, lame_get_decode_only(gf))) == NULL) {
+    if ((outf = init_outfile(outPath, 0)) == NULL) {
         error_printf("Can't init outfile '%s'\n", outPath);
         return NULL;
     }
@@ -126,150 +126,6 @@ init_files(lame_global_flags * gf, char const *inPath, char const *outPath)
 }
 
 
-#ifdef HAVE_MPGLIB
-static void
-printInputFormat(lame_t gfp)
-{
-    int const v_main = 2 - lame_get_mpeg_version(gfp);
-    char const *v_ex = lame_get_out_samplerate(gfp) < 16000 ? ".5" : "";
-    switch (global_reader.input_format) {
-    case sf_mp123:     /* FIXME: !!! */
-        break;
-    case sf_mp3:
-        console_printf("MPEG-%u%s Layer %s", v_main, v_ex, "III");
-        break;
-    case sf_mp2:
-        console_printf("MPEG-%u%s Layer %s", v_main, v_ex, "II");
-        break;
-    case sf_mp1:
-        console_printf("MPEG-%u%s Layer %s", v_main, v_ex, "I");
-        break;
-    case sf_raw:
-        console_printf("raw PCM data");
-        break;
-    case sf_wave:
-        console_printf("Microsoft WAVE");
-        break;
-    case sf_aiff:
-        console_printf("SGI/Apple AIFF");
-        break;
-    default:
-        console_printf("unknown");
-        break;
-    }
-}
-
-/* the simple lame decoder */
-/* After calling lame_init(), lame_init_params() and
- * init_infile(), call this routine to read the input MP3 file
- * and output .wav data to the specified file pointer*/
-/* lame_decoder will ignore the first 528 samples, since these samples
- * represent the mpglib delay (and are all 0).  skip = number of additional
- * samples to skip, to (for example) compensate for the encoder delay */
-
-static int
-lame_decoder_loop(lame_t gfp, FILE * outf, char *inPath, char *outPath)
-{
-    short int Buffer[2][1152];
-    int     i, iread;
-    double  wavsize;
-    int     tmp_num_channels = lame_get_num_channels(gfp);
-    int     skip_start = samples_to_skip_at_start();
-    int     skip_end = samples_to_skip_at_end();
-    DecoderProgress dp = 0;
-
-    if (!(tmp_num_channels >= 1 && tmp_num_channels <= 2)) {
-        error_printf("Internal error.  Aborting.");
-        return -1;
-    }
-
-    if (global_ui_config.silent < 9) {
-        console_printf("\rinput:  %s%s(%g kHz, %i channel%s, ",
-                       strcmp(inPath, "-") ? inPath : "<stdin>",
-                       strlen(inPath) > 26 ? "\n\t" : "  ",
-                       lame_get_in_samplerate(gfp) / 1.e3,
-                       tmp_num_channels, tmp_num_channels != 1 ? "s" : "");
-
-        printInputFormat(gfp);
-
-        console_printf(")\noutput: %s%s(16 bit, Microsoft WAVE)\n",
-                       strcmp(outPath, "-") ? outPath : "<stdout>",
-                       strlen(outPath) > 45 ? "\n\t" : "  ");
-
-        if (skip_start > 0)
-            console_printf("skipping initial %i samples (encoder+decoder delay)\n", skip_start);
-        if (skip_end > 0)
-            console_printf("skipping final %i samples (encoder padding-decoder delay)\n", skip_end);
-
-        switch (global_reader.input_format) {
-        case sf_mp3:
-        case sf_mp2:
-        case sf_mp1:
-            dp = decoder_progress_init(lame_get_num_samples(gfp),
-                                       global_decoder.mp3input_data.framesize);
-            break;
-        case sf_raw:
-        case sf_wave:
-        case sf_aiff:
-        default:
-            dp = decoder_progress_init(lame_get_num_samples(gfp),
-                                       lame_get_in_samplerate(gfp) < 32000 ? 576 : 1152);
-            break;
-        }
-    }
-
-    if (0 == global_decoder.disable_wav_header)
-        WriteWaveHeader(outf, 0x7FFFFFFF, lame_get_in_samplerate(gfp), tmp_num_channels, 16);
-    /* unknown size, so write maximum 32 bit signed value */
-
-    wavsize = 0;
-    do {
-        iread = get_audio16(gfp, Buffer); /* read in 'iread' samples */
-        if (iread >= 0) {
-            wavsize += iread;
-            if (dp != 0) {
-                decoder_progress(dp, &global_decoder.mp3input_data, iread);
-            }
-            put_audio16(outf, Buffer, iread, tmp_num_channels);
-        }
-    } while (iread > 0);
-
-    i = (16 / 8) * tmp_num_channels;
-    assert(i > 0);
-    if (wavsize <= 0) {
-        if (global_ui_config.silent < 10)
-            error_printf("WAVE file contains 0 PCM samples\n");
-        wavsize = 0;
-    }
-    else if (wavsize > 0xFFFFFFD0 / i) {
-        if (global_ui_config.silent < 10)
-            error_printf("Very huge WAVE file, can't set filesize accordingly\n");
-        wavsize = 0xFFFFFFD0;
-    }
-    else {
-        wavsize *= i;
-    }
-    /* if outf is seekable, rewind and adjust length */
-    if (!global_decoder.disable_wav_header && strcmp("-", outPath)
-        && !fseek(outf, 0l, SEEK_SET))
-        WriteWaveHeader(outf, (int) wavsize, lame_get_in_samplerate(gfp), tmp_num_channels, 16);
-
-    if (dp != 0)
-        decoder_progress_finish(dp);
-    return 0;
-}
-
-static int
-lame_decoder(lame_t gfp, FILE * outf, char *inPath, char *outPath)
-{
-    int     ret;
-
-    ret = lame_decoder_loop(gfp, outf, inPath, outPath);
-    fclose(outf);       /* close the output file */
-    close_infile();     /* close the input file */
-    return ret;
-}
-#endif
 
 
 static void
@@ -285,43 +141,6 @@ print_trailing_info(lame_global_flags * gf)
                  "         high to be stored in the header.\n");
     }
 
-    /* if (the user requested printing info about clipping) and (decoding
-       on the fly has actually been performed) */
-    if (global_ui_config.print_clipping_info && lame_get_decode_on_the_fly(gf)) {
-        float   noclipGainChange = (float) lame_get_noclipGainChange(gf) / 10.0f;
-        float   noclipScale = lame_get_noclipScale(gf);
-
-        if (noclipGainChange > 0.0) { /* clipping occurs */
-            console_printf
-                ("WARNING: clipping occurs at the current gain. Set your decoder to decrease\n"
-                 "         the  gain  by  at least %.1fdB or encode again ", noclipGainChange);
-
-            /* advice the user on the scale factor */
-            if (noclipScale > 0) {
-                console_printf("using  --scale %.2f\n", noclipScale * lame_get_scale(gf));
-                console_printf("         or less (the value under --scale is approximate).\n");
-            }
-            else {
-                /* the user specified his own scale factor. We could suggest
-                 * the scale factor of (32767.0/gfp->PeakSample)*(gfp->scale)
-                 * but it's usually very inaccurate. So we'd rather advice him to
-                 * disable scaling first and see our suggestion on the scale factor then. */
-                console_printf("using --scale <arg>\n"
-                               "         (For   a   suggestion  on  the  optimal  value  of  <arg>  encode\n"
-                               "         with  --scale 1  first)\n");
-            }
-
-        }
-        else {          /* no clipping */
-            if (noclipGainChange > -0.1)
-                console_printf
-                    ("\nThe waveform does not clip and is less than 0.1dB away from full scale.\n");
-            else
-                console_printf
-                    ("\nThe waveform does not clip and is at least %.1fdB away from full scale.\n",
-                     -noclipGainChange);
-        }
-    }
 
 }
 
@@ -630,18 +449,7 @@ lame_main(lame_t gf, int argc, char **argv)
         global_ui_config.brhist = 0; /* turn off VBR histogram */
     }
 
-    if (lame_get_decode_only(gf)) {
-#ifdef HAVE_MPGLIB
-        /* decode an mp3 file to a .wav */
-        ret = lame_decoder(gf, outf, inPath, outPath);
-#else
-        error_printf("fatal error: this build does not include mp3 decoding support\n");
-        fclose(outf);
-        close_infile();
-        ret = -1;
-#endif
-    }
-    else if (max_nogap == 0) {
+    if (max_nogap == 0) {
         /* encode a single input file */
         ret = lame_encoder(gf, outf, 0, inPath, outPath);
     }
