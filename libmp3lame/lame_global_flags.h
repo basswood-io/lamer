@@ -169,12 +169,6 @@ struct lame_global_struct {
     lame_internal_flags *internal_flags;
 
 
-    struct {
-        int     mmx;
-        int     amd3dnow;
-        int     sse;
-
-    } asm_optimizations;
 };
 
 int     is_lame_global_flags_valid(const lame_global_flags * gfp);

@@ -2046,32 +2046,6 @@ lame_set_preset(lame_global_flags * gfp, int preset)
 
 
 
-int
-lame_set_asm_optimizations(lame_global_flags * gfp, int optim, int mode)
-{
-    if (is_lame_global_flags_valid(gfp)) {
-        mode = (mode == 1 ? 1 : 0);
-        switch (optim) {
-        case MMX:{
-                gfp->asm_optimizations.mmx = mode;
-                return optim;
-            }
-        case AMD_3DNOW:{
-                gfp->asm_optimizations.amd3dnow = mode;
-                return optim;
-            }
-        case SSE:{
-                gfp->asm_optimizations.sse = mode;
-                return optim;
-            }
-        default:
-            return optim;
-        }
-    }
-    return -1;
-}
-
-
 void
 lame_set_write_id3tag_automatic(lame_global_flags * gfp, int v)
 {

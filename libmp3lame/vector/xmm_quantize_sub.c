@@ -127,7 +127,7 @@ fht_SSE2(FLOAT * fz, int n)
     FLOAT  *fi, *gi;
     FLOAT const *fn;
 
-    n <<= 1;            /* to get BLKSIZE, because of 3DNow! ASM routine */
+    n <<= 1;            /* convert the half-block length to BLKSIZE */
     fn = fz + n;
     k4 = 4;
     do {
@@ -297,7 +297,7 @@ fht_neon(FLOAT * fz, int n)
     FLOAT  *fi, *gi;
     FLOAT const *fn;
 
-    n <<= 1;            /* to get BLKSIZE, because of 3DNow! ASM routine */
+    n <<= 1;            /* convert the half-block length to BLKSIZE */
     fn = fz + n;
     k4 = 4;
     do {

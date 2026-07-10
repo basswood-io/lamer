@@ -762,65 +762,31 @@ lame_errorf(const lame_internal_flags* gfc, const char *format, ...)
 
 /***********************************************************************
  *
- *      routines to detect CPU specific features like 3DNow, MMX, SSE
+ *      routines to detect CPU-specific SSE features
  *
  *  donated by Frank Klemm
  *  added Robert Hegemann 2000-10-10
  *
  ***********************************************************************/
 
-#ifdef HAVE_NASM
-extern int has_MMX_nasm(void);
-extern int has_3DNow_nasm(void);
-extern int has_SSE_nasm(void);
-extern int has_SSE2_nasm(void);
-#endif
-
-int
-has_MMX(void)
-{
-#ifdef HAVE_NASM
-    return has_MMX_nasm();
-#else
-    return 0;           /* don't know, assume not */
-#endif
-}
-
-int
-has_3DNow(void)
-{
-#ifdef HAVE_NASM
-    return has_3DNow_nasm();
-#else
-    return 0;           /* don't know, assume not */
-#endif
-}
 
 int
 has_SSE(void)
 {
-#ifdef HAVE_NASM
-    return has_SSE_nasm();
-#else
 #if defined(__SSE__) || defined(_M_X64) || defined(_M_IX86_FP) || defined(MIN_ARCH_SSE)
     return 1;
 #else
     return 0;           /* don't know, assume not */
-#endif
 #endif
 }
 
 int
 has_SSE2(void)
 {
-#ifdef HAVE_NASM
-    return has_SSE2_nasm();
-#else
 #if defined(__SSE2__) || defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2) || defined(MIN_ARCH_SSE)
     return 1;
 #else
     return 0;           /* don't know, assume not */
-#endif
 #endif
 }
 

@@ -119,14 +119,6 @@ typedef enum preset_mode_e {
 } preset_mode;
 
 
-/*asm optimizations*/
-typedef enum asm_optimizations_e {
-    MMX = 1,
-    AMD_3DNOW = 2,
-    SSE = 3
-} asm_optimizations;
-
-
 /* psychoacoustic model */
 typedef enum Psy_model_e {
     PSY_GPSYCHO = 1,
@@ -336,7 +328,6 @@ float CDECL lame_get_compression_ratio(const lame_global_flags *);
 
 
 int CDECL lame_set_preset( lame_global_flags*  gfp, int );
-int CDECL lame_set_asm_optimizations( lame_global_flags*  gfp, int, int );
 
 
 

@@ -534,7 +534,7 @@ static const count_fnc count_fncs[] =
 };
 
 static int
-choose_table_nonMMX(const int *ix, const int *const end, int *const _s)
+choose_table_c(const int *ix, const int *const end, int *const _s)
 {
     unsigned int* s = (unsigned int*)_s;
     unsigned int  max;
@@ -1245,22 +1245,14 @@ scale_bitcount(const lame_internal_flags * gfc, gr_info * cod_info)
 }
 
 
-#ifdef MMX_choose_table
-extern int choose_table_MMX(const int *ix, const int *const end, int *const s);
-#endif
 
 void
 huffman_init(lame_internal_flags * const gfc)
 {
     int     i;
 
-    gfc->choose_table = choose_table_nonMMX;
+    gfc->choose_table = choose_table_c;
 
-#ifdef MMX_choose_table
-    if (gfc->CPU_features.MMX) {
-        gfc->choose_table = choose_table_MMX;
-    }
-#endif
 
     for (i = 2; i <= 576; i += 2) {
         int     scfb_anz = 0, bv_index;

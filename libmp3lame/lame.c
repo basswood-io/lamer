@@ -586,24 +586,8 @@ lame_init_params(lame_global_flags * gfp)
     gfc->report_dbg = gfp->report.debugf;
     gfc->report_err = gfp->report.errorf;
 
-    if (gfp->asm_optimizations.amd3dnow)
-        gfc->CPU_features.AMD_3DNow = has_3DNow();
-    else
-        gfc->CPU_features.AMD_3DNow = 0;
-
-    if (gfp->asm_optimizations.mmx)
-        gfc->CPU_features.MMX = has_MMX();
-    else
-        gfc->CPU_features.MMX = 0;
-
-    if (gfp->asm_optimizations.sse) {
-        gfc->CPU_features.SSE = has_SSE();
-        gfc->CPU_features.SSE2 = has_SSE2();
-    }
-    else {
-        gfc->CPU_features.SSE = 0;
-        gfc->CPU_features.SSE2 = 0;
-    }
+    gfc->CPU_features.SSE = has_SSE();
+    gfc->CPU_features.SSE2 = has_SSE2();
 
 
     cfg->vbr = gfp->VBR;
@@ -1328,43 +1312,17 @@ lame_print_config(const lame_global_flags * gfp)
 #if (LAME_ALPHA_VERSION)
     MSGF(gfc, "warning: alpha versions should be used for testing only\n");
 #endif
-    if (gfc->CPU_features.MMX
-        || gfc->CPU_features.AMD_3DNow || gfc->CPU_features.SSE || gfc->CPU_features.SSE2) {
+    if (gfc->CPU_features.SSE || gfc->CPU_features.SSE2) {
         char    text[256] = { 0 };
-        int     fft_asm_used = 0;
-#ifdef HAVE_NASM
-        if (gfc->CPU_features.AMD_3DNow) {
-            fft_asm_used = 1;
-        }
-        else if (gfc->CPU_features.SSE) {
-            fft_asm_used = 2;
-        }
-#else
-# if LAME_HAVE_SSE_INTRINSICS && (defined(__SSE__) || defined(_M_X64) || defined(_M_IX86_FP))
-        {
-            fft_asm_used = 3;
-        }
-# endif
-#endif
-        if (gfc->CPU_features.MMX) {
-#ifdef MMX_choose_table
-            concatSep(text, ", ", "MMX (ASM used)");
-#else
-            concatSep(text, ", ", "MMX");
-#endif
-        }
-        if (gfc->CPU_features.AMD_3DNow) {
-            concatSep(text, ", ", (fft_asm_used == 1) ? "3DNow! (ASM used)" : "3DNow!");
-        }
         if (gfc->CPU_features.SSE) {
 #if LAME_HAVE_SSE_INTRINSICS
             concatSep(text, ", ", "SSE (intrinsics)");
 #else
-            concatSep(text, ", ", (fft_asm_used == 2) ? "SSE (ASM used)" : "SSE");
+            concatSep(text, ", ", "SSE");
 #endif
         }
         if (gfc->CPU_features.SSE2) {
-            concatSep(text, ", ", (fft_asm_used == 3) ? "SSE2 (intrinsics)" : "SSE2");
+            concatSep(text, ", ", "SSE2 (intrinsics)");
         }
         MSGF(gfc, "CPU features: %s\n", text);
     }
@@ -2417,10 +2375,6 @@ lame_init_old(lame_global_flags * gfp)
     gfp->interChRatio = -1;
 
     gfp->findReplayGain = 0;
-
-    gfp->asm_optimizations.mmx = 1;
-    gfp->asm_optimizations.amd3dnow = 1;
-    gfp->asm_optimizations.sse = 1;
 
     gfp->preset = 0;
 

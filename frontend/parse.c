@@ -825,13 +825,6 @@ long_help(const lame_global_flags * gfp, FILE * const fp, const char *ProgramNam
             "\nMisc:\n    --license       print License information\n\n"
         );
 
-#if defined(HAVE_NASM)
-    wait_for(fp, lessmode);
-    fprintf(fp,
-            "  Platform specific:\n"
-            "    --noasm <instructions> disable assembly optimizations for mmx/3dnow/sse\n");
-    wait_for(fp, lessmode);
-#endif
 
     display_bitrates(fp);
 
@@ -1643,15 +1636,6 @@ parse_args_(lame_global_flags * gfp, int argc, char **argv,
                         gain = pow(10.f, gain*0.05);
                         (void) lame_set_scale(gfp, (float) gain);
                     }
-
-                T_ELIF("noasm")
-                    argUsed = 1;
-                if (!strcmp(nextArg, "mmx"))
-                    (void) lame_set_asm_optimizations(gfp, MMX, 0);
-                if (!strcmp(nextArg, "3dnow"))
-                    (void) lame_set_asm_optimizations(gfp, AMD_3DNOW, 0);
-                if (!strcmp(nextArg, "sse"))
-                    (void) lame_set_asm_optimizations(gfp, SSE, 0);
 
                 T_ELIF("freeformat")
                     lame_set_free_format(gfp, 1);
